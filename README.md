@@ -2,15 +2,9 @@
 
 Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available in JDK-14.
 
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
 [![BSD-2 license](https://img.shields.io/badge/License-BSD--2-informational.svg)](LICENSE)
 
-## Usage
-
-```kotlin
-plugins {
-    id("org.panteleyev.jpackageplugin") version "0.0.1"
-}
-```
 This plugin will try to use ```jpackage``` executable from path specified by ```java.home``` system property.
 
 ## Configuration
@@ -23,9 +17,11 @@ OS-specific parameters should be conditionally specified for each required OS.
 *Example:*
 
 ```kotlin
-if (OperatingSystem.current().isMacOsX) {
+mac {
     icon = "icons/icons.icns"
-} else if (OperatingSystem.current().isWindows) {
+}
+
+windows {
     icon = "icons/icons.ico"
     winMenu = true
     winDirChooser = true
@@ -142,9 +138,11 @@ tasks.withType<org.panteleyev.jpackage.JPackageTask> {
         "-Dfile.encoding=UTF-8"
     )
 
-    if (OperatingSystem.current().isMacOsX) {
+    mac {
         icon = "icons/icons.icns"
-    } else if (OperatingSystem.current().isWindows) {
+    }
+    
+    windows {
         icon = "icons/icons.ico"
         winMenu = true
         winDirChooser = true

@@ -3,12 +3,11 @@
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
 group = "org.panteleyev"
-version = "0.0.1"
+version = "0.0.2"
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    signing
     id("org.jetbrains.kotlin.jvm") version "1.3.71"
     id("com.gradle.plugin-publish") version "0.12.0"
 }
@@ -20,8 +19,7 @@ repositories {
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.testng:testng:6.14.3")
 }
 
 gradlePlugin {
@@ -38,4 +36,8 @@ pluginBundle {
     website = "https://github.com/petr-panteleyev/jpackage-gradle-plugin"
     vcsUrl = "https://github.com/petr-panteleyev/jpackage-gradle-plugin.git"
     tags = listOf("jpackage")
+}
+
+tasks.withType<Test> {
+    useTestNG()
 }

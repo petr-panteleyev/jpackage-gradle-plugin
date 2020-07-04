@@ -5,12 +5,12 @@
 package org.panteleyev.jpackage
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
 import java.io.BufferedReader
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 
@@ -210,17 +210,34 @@ open class JPackageTask : DefaultTask() {
         logCmdOutput(process.errorStream)
         val status = process.waitFor()
         if (status != 0) {
-            throw RuntimeException("Error while executing jpackage")
+            throw GradleException("Error while executing jpackage")
         }
     }
 
-    @Throws(IOException::class)
     private fun logCmdOutput(stream: InputStream) {
         BufferedReader(InputStreamReader(stream)).use { reader ->
             var line: String?
             while (reader.readLine().also { line = it } != null) {
                 println(line)
             }
+        }
+    }
+
+    fun windows(block: () -> Unit) {
+        if (OperatingSystem.current().isWindows) {
+            block()
+        }
+    }
+
+    fun mac(block: () -> Unit) {
+        if (OperatingSystem.current().isMacOsX) {
+            block()
+        }
+    }
+
+    fun linux(block: () -> Unit) {
+        if (OperatingSystem.current().isLinux) {
+            block()
         }
     }
 }
