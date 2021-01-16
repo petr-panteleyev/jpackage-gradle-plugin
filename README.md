@@ -1,11 +1,17 @@
 # JPackage Gradle Plugin
 
-Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available in JDK-14.
+Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available since JDK-14.
 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
 [![BSD-2 license](https://img.shields.io/badge/License-BSD--2-informational.svg)](LICENSE)
 
-This plugin will try to use ```jpackage``` executable from path specified by ```java.home``` system property.
+## Finding jpackage
+
+Plugin searches for jpackage executable using the following priority list:
+
+1. Configured toolchain
+
+2. ```java.home``` system property.
 
 ## Configuration
 
@@ -121,9 +127,14 @@ task("copyDependencies", Copy::class) {
     from(configurations.runtimeClasspath).into("$buildDir/jmods")
 }
 
+task("copyJar", Copy::class) {
+    from(tasks.jar).into("$buildDir/jmods")
+}
+
 tasks.withType<org.panteleyev.jpackage.JPackageTask> {
     dependsOn("build")
     dependsOn("copyDependencies")
+    dependsOn("copyJar")
 
     appName = "Application Name"
     appVersion = project.version as String
@@ -150,6 +161,12 @@ tasks.withType<org.panteleyev.jpackage.JPackageTask> {
 }
 ```
 
+## Gradle Version Compatibility
+
+| Plugin | Gradle |
+|---|---|
+|0.0.3|6.7+|
+
 ## References
 
-[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/14/jpackage/packaging-tool-user-guide.pdf)
+[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/15/jpackage/packaging-tool-user-guide.pdf)

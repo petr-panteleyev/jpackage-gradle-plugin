@@ -6,15 +6,21 @@ package org.panteleyev.jpackage
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JavaToolchainService
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
 import java.io.InputStreamReader
 
 open class JPackageTask : DefaultTask() {
+    companion object {
+        const val EXECUTABLE = "jpackage"
+    }
+
     @Input
     var verbose = false
 
@@ -132,16 +138,48 @@ open class JPackageTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        val jpackage = getJPackageFromJavaHome()
+        var jpackage = getJPackageFromToolchain()
+        if (jpackage == null) {
+            jpackage = getJPackageFromJavaHome()
+        }
         println("Using: $jpackage")
 
         execute(jpackage)
     }
 
+    private fun buildExecutablePath(home: String): String {
+        val executable = "$home${File.separator}bin${File.separator}$EXECUTABLE"
+        return if (OperatingSystem.current().isWindows) {
+            "${executable}.exe"
+        } else {
+            executable
+        }
+    }
+
+    private fun getJPackageFromToolchain(): String? {
+        logger.info("Looking for $EXECUTABLE in toolchain")
+        try {
+            val toolchain = project.extensions.getByType(JavaPluginExtension::class.java).toolchain
+            val service = project.extensions.getByType(JavaToolchainService::class.java)
+            val defaultLauncher = service.launcherFor(toolchain)
+            val home = defaultLauncher.get().metadata.installationPath.asFile.absolutePath
+            val executable = buildExecutablePath(home)
+            if (File(executable).exists()) {
+                return executable
+            } else {
+                logger.warn("File $executable does not exist")
+                return null
+            }
+        } catch (ex: Exception) {
+            logger.warn("Toolchain is not configured")
+            return null
+        }
+    }
+
     private fun getJPackageFromJavaHome(): String {
-        println("Getting jpackage from java.home")
-        val javaHome = System.getProperty("java.home") ?: throw RuntimeException("java.home is not set")
-        return javaHome + File.separator + "bin" + File.separator + "jpackage"
+        logger.info("Getting jpackage from java.home")
+        val javaHome = System.getProperty("java.home") ?: throw GradleException("java.home is not set")
+        return buildExecutablePath(javaHome)
     }
 
     private fun buildParameters(parameters: ArrayList<String>) {
@@ -210,7 +248,7 @@ open class JPackageTask : DefaultTask() {
         logCmdOutput(process.errorStream)
         val status = process.waitFor()
         if (status != 0) {
-            throw GradleException("Error while executing jpackage")
+            throw GradleException("Error while executing $EXECUTABLE")
         }
     }
 
