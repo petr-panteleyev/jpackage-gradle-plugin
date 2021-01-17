@@ -3,12 +3,12 @@
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
 group = "org.panteleyev"
-version = "1.0.0"
+version = "1.0.1"
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "1.4.21"
+    id("org.jetbrains.kotlin.jvm") version "1.3.72"
     id("com.gradle.plugin-publish") version "0.12.0"
 }
 
