@@ -2,9 +2,9 @@
  Copyright (c) Petr Panteleyev. All rights reserved.
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
-package org.panteleyev.jpackage
+package org.panteleyev.jpackage;
 
-enum class ImageType(override val value: String) : EnumParameter {
+public enum ImageType implements EnumParameter {
     DEFAULT(""),
     APP_IMAGE("app-image"),
     DMG("dmg"),
@@ -13,4 +13,15 @@ enum class ImageType(override val value: String) : EnumParameter {
     MSI("msi"),
     RPM("rpm"),
     DEB("deb");
+
+    private final String value;
+
+    ImageType(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
 }
