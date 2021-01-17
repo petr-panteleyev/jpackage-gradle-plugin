@@ -3,6 +3,7 @@
 Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available since JDK-14.
 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
+[![Gradle](https://img.shields.io/badge/Gradle-6.7%2B-green)](https://gradle.org/)
 [![BSD-2 license](https://img.shields.io/badge/License-BSD--2-informational.svg)](LICENSE)
 
 ## Finding jpackage
@@ -15,80 +16,85 @@ Plugin searches for jpackage executable using the following priority list:
 
 ## Configuration
 
-There are generic parameters as well as OS-specific parameters for OS X, Linux, Windows.
-Plugin determines OS name using ```os.name``` system property in order to configure OS-specific parameters.
+There are generic ```jpackage``` parameters as well as OS-specific parameters for OS X, Linux, Windows.
+OS-specific parameters are processed when build is done on the corresponding OS.
 
-OS-specific parameters should be conditionally specified for each required OS.
+If some generic parameters should have different values based on OS then they should be placed into configuration blocks:
+
+* windows
+* mac
+* linux
 
 *Example:*
 
 ```kotlin
+// Windows specific parameters will be processed only during Windows build
+winMenu = true
+winDirChooser = true
+
 mac {
+    // Generic parameter value for OS X build
     icon = "icons/icons.icns"
 }
 
 windows {
+    // Generic parameter value for Windows build
     icon = "icons/icons.ico"
-    winMenu = true
-    winDirChooser = true
 }
 ```
 
-### Generic Parameters
+### Parameters
 
-| Parameter | JPackage Argument |
-|---|---|
-|type|--type &lt;type>|
-|appName|--name &lt;name>|
-|appVersion|--app-version &lt;version>|
-|destination|--dest &lt;destination path>|
-|copyright|--copyright &lt;copyright string>|
-|appDescription|--description &lt;description string>|
-|vendor|--vendor &lt;vendor string>|
-|runtimeImage|--runtime-image &lt;file path>|
-|input|--input &lt;input path>|
-|installDir|--install-dir &lt;file path>|
-|module|--module &lt;module name>[/&lt;main class>]|
-|modulePath|--module-path &lt;module path>...|
-|mainClass|--main-class &lt;class name>|
-|mainJar|--main-jar &lt;main jar file>|
-|icon|--icon &lt;icon file path>|
-|verbose|--verbose|
-|arguments|--arguments &lt;main class arguments>|
+<table>
+<tr><th>Parameter</th><th>JPackage Argument</th></tr>
+<tr><th colspan="2">Generic</th></tr>
+<tr><td>type</td><td>--type &lt;type></td></tr>
+<tr><td>appName</td><td>--name &lt;name></td></tr>
+<tr><td>appVersion</td><td>--app-version &lt;version></td></tr>
+<tr><td>destination</td><td>--dest &lt;destination path></td></tr>
+<tr><td>copyright</td><td>--copyright &lt;copyright string></td></tr>
+<tr><td>appDescription</td><td>--description &lt;description string></td></tr>
+<tr><td>vendor</td><td>--vendor &lt;vendor string></td></tr>
+<tr><td>runtimeImage</td><td>--runtime-image &lt;file path></td></tr>
+<tr><td>input</td><td>--input &lt;input path></td></tr>
+<tr><td>installDir</td><td>--install-dir &lt;file path></td></tr>
+<tr><td>module</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
+<tr><td>modulePath</td><td>--module-path &lt;module path>...</td></tr>
+<tr><td>mainClass</td><td>--main-class &lt;class name></td></tr>
+<tr><td>mainJar</td><td>--main-jar &lt;main jar file></td></tr>
+<tr><td>icon</td><td>--icon &lt;icon file path></td></tr>
+<tr><td>verbose</td><td>--verbose</td></tr>
+<tr><td>arguments</td><td>--arguments &lt;main class arguments></td></tr>
+<tr><td>licenseFile</td><td>--license-file &lt;license file path></td></tr>
+<tr><td>resourceDir</td><td>--resource-dir &lt;resource dir path></td></tr>
+<tr><td>temp</td><td>--temp &lt;temp dir path></td></tr>
 
-### Windows Specific Parameters
+<tr><th colspan="2">Windows</th></tr>
+<tr><td>winMenu</td><td>--win-menu</td></tr>
+<tr><td>winDirChooser</td><td>--win-dir-chooser</td></tr>
+<tr><td>winUpgradeUuid</td><td>--win-upgrade-uuid &lt;id string></td></tr>
+<tr><td>winMenuGroup</td><td>--win-menu-group &lt;menu group name></td></tr>
+<tr><td>winShortcut</td><td>--win-shortcut</td></tr>
+<tr><td>winPerUserInstall</td><td>--win-per-user-install</td></tr>
 
-| Parameter | jpackage argument |
-|---|---|
-|winMenu|--win-menu|
-|winDirChooser|--win-dir-chooser|
-|winUpgradeUuid|--win-upgrade-uuid &lt;id string>|
-|winMenuGroup|--win-menu-group &lt;menu group name>|
-|winShortcut|--win-shortcut|
-|winPerUserInstall|--win-per-user-install|
+<tr><th colspan="2">OS X</th></tr>
+<tr><td>macPackageIdentifier</td><td>--mac-package-identifier &lt;ID string></td></tr>
+<tr><td>macPackageName</td><td>--mac-package-name &lt;name string></td></tr>
+<tr><td>macPackageSigningPrefix</td><td>--mac-package-signing-prefix &lt;prefix string></td></tr>
+<tr><td>macSign</td><td>--mac-sign</td></tr>
+<tr><td>macSigningKeychain</td><td>--mac-signing-keychain &lt;file path></td></tr>
+<tr><td>macSigningKeyUserName</td><td>--mac-signing-key-user-name &lt;team name></td></tr>
 
-### OS X Specific Parameters
+<tr><th colspan="2">Linux</th></tr>
+<tr><td>linuxPackageName</td><td>--linux-package-name &lt;package name></td></tr>
+<tr><td>linuxDebMaintainer</td><td>--linux-deb-maintainer &lt;email address></td></tr>
+<tr><td>linuxMenuGroup</td><td>--linux-menu-group &lt;menu-group-name></td></tr>
+<tr><td>linuxRpmLicenseType</td><td>--linux-rpm-license-type &lt;type string></td></tr>
+<tr><td>linuxAppRelease</td><td>--linux-app-release &lt;release value></td></tr>
+<tr><td>linuxAppCategory</td><td>--linux-app-category &lt;category value></td></tr>
+<tr><td>linuxShortcut</td><td>--linux-shortcut</td></tr>
 
-| Parameter | jpackage argument |
-|---|---|
-|macPackageIdentifier|--mac-package-identifier &lt;ID string>|
-|macPackageName|--mac-package-name &lt;name string>|
-|macPackageSigningPrefix|--mac-package-signing-prefix &lt;prefix string>|
-|macSign|--mac-sign|
-|macSigningKeychain|--mac-signing-keychain &lt;file path>|
-|macSigningKeyUserName|--mac-signing-key-user-name &lt;team name>|
-
-### Linux Specific Parameters
-
-| Parameter | jpackage argument |
-|---|---|
-|linuxPackageName|--linux-package-name &lt;package name>|
-|linuxDebMaintainer|--linux-deb-maintainer &lt;email address>|
-|linuxMenuGroup|--linux-menu-group &lt;menu-group-name>|
-|linuxRpmLicenseType|--linux-rpm-license-type &lt;type string>|
-|linuxAppRelease|--linux-app-release &lt;release value>|
-|linuxAppCategory|--linux-app-category &lt;category value>|
-|linuxShortcut|--linux-shortcut|
+</table>
 
 ### Image Type
 
@@ -165,7 +171,7 @@ tasks.withType<org.panteleyev.jpackage.JPackageTask> {
 
 | Plugin | Gradle |
 |---|---|
-|0.0.3|6.7+|
+|0.0.3+|6.7+|
 
 ## References
 

@@ -70,6 +70,15 @@ open class JPackageTask : DefaultTask() {
     var modulePath = ""
 
     @Input
+    var licenseFile = ""
+
+    @Input
+    var resourceDir = ""
+
+    @Input
+    var temp = ""
+
+    @Input
     var javaOptions: List<String> = ArrayList()
 
     @Input
@@ -142,7 +151,7 @@ open class JPackageTask : DefaultTask() {
         if (jpackage == null) {
             jpackage = getJPackageFromJavaHome()
         }
-        println("Using: $jpackage")
+        logger.info("Using: $jpackage")
 
         execute(jpackage)
     }
@@ -177,7 +186,7 @@ open class JPackageTask : DefaultTask() {
     }
 
     private fun getJPackageFromJavaHome(): String {
-        logger.info("Getting jpackage from java.home")
+        logger.info("Getting $EXECUTABLE from java.home")
         val javaHome = System.getProperty("java.home") ?: throw GradleException("java.home is not set")
         return buildExecutablePath(javaHome)
     }
@@ -202,6 +211,9 @@ open class JPackageTask : DefaultTask() {
             .addParameter("--main-jar", mainJar)
             .addParameter("--module-path", modulePath)
             .addParameter("--icon", icon)
+            .addParameter("--license-file", licenseFile)
+            .addParameter("--resource-dir", resourceDir)
+            .addParameter("--temp", temp)
 
         for (option in javaOptions) {
             parameters.addParameter("--java-options", option.escape())
@@ -243,7 +255,7 @@ open class JPackageTask : DefaultTask() {
         buildParameters(parameters)
         processBuilder.command(parameters)
         val process = processBuilder.start()
-        println("jpackage output:")
+        logger.info("jpackage output:")
         logCmdOutput(process.inputStream)
         logCmdOutput(process.errorStream)
         val status = process.waitFor()
@@ -256,7 +268,7 @@ open class JPackageTask : DefaultTask() {
         BufferedReader(InputStreamReader(stream)).use { reader ->
             var line: String?
             while (reader.readLine().also { line = it } != null) {
-                println(line)
+                logger.info(line)
             }
         }
     }
@@ -278,4 +290,34 @@ open class JPackageTask : DefaultTask() {
             block()
         }
     }
+
+    // Extensions
+
+    private fun ArrayList<String>.addParameter(name: String, value: String): ArrayList<String> {
+        if (value.isBlank()) {
+            return this
+        }
+
+        logger.info("$name $value")
+        add(name)
+        add(value)
+        return this
+    }
+
+    private fun ArrayList<String>.addParameter(name: String, value: Boolean): ArrayList<String> {
+        if (value) {
+            logger.info(name)
+            add(name)
+        }
+
+        return this
+    }
+
+    private fun ArrayList<String>.addParameter(name: String, value: EnumParameter?): ArrayList<String> {
+        if (value != null) {
+            addParameter(name, value.value)
+        }
+        return this
+    }
+
 }

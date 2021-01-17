@@ -3,7 +3,7 @@
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
 group = "org.panteleyev"
-version = "0.0.3"
+version = "1.0.0"
 
 plugins {
     `java-gradle-plugin`
