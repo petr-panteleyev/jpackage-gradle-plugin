@@ -59,7 +59,7 @@ windows {
 <tr><td>input</td><td>--input &lt;input path></td></tr>
 <tr><td>installDir</td><td>--install-dir &lt;file path></td></tr>
 <tr><td>module</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
-<tr><td>modulePath</td><td>--module-path &lt;module path>...</td></tr>
+<tr><td>modulePaths</td><td>--module-path &lt;module path>...</td></tr>
 <tr><td>mainClass</td><td>--main-class &lt;class name></td></tr>
 <tr><td>mainJar</td><td>--main-jar &lt;main jar file></td></tr>
 <tr><td>icon</td><td>--icon &lt;icon file path></td></tr>
@@ -68,6 +68,9 @@ windows {
 <tr><td>licenseFile</td><td>--license-file &lt;license file path></td></tr>
 <tr><td>resourceDir</td><td>--resource-dir &lt;resource dir path></td></tr>
 <tr><td>temp</td><td>--temp &lt;temp dir path></td></tr>
+<tr><td>fileAssociations</td><td>--file-associations &lt;file association property file></td></tr>
+<tr><td>launchers</td><td>--add-launcher &lt;launcher property file></td></tr>
+<tr><td>addModules</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
 
 <tr><th colspan="2">Windows</th></tr>
 <tr><td>winMenu</td><td>--win-menu</td></tr>

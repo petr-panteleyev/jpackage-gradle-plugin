@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
@@ -76,7 +77,11 @@ public class JPackageTask extends DefaultTask {
     private String appDescription = "";
 
     @Input
+    @Deprecated
     private String modulePath = "";
+
+    @Input
+    private List<String> modulePaths = Collections.emptyList();
 
     @Input
     private String licenseFile = "";
@@ -88,10 +93,19 @@ public class JPackageTask extends DefaultTask {
     private String temp = "";
 
     @Input
-    private List<String> javaOptions = new ArrayList<>();
+    private List<String> javaOptions = Collections.emptyList();
 
     @Input
-    private List<String> arguments = new ArrayList<>();
+    private List<String> arguments = Collections.emptyList();
+
+    @Input
+    private List<String> fileAssociations = Collections.emptyList();
+
+    @Input
+    private List<Launcher> launchers = Collections.emptyList();
+
+    @Input
+    private List<String> addModules = Collections.emptyList();
 
     // Windows specific parameters
     @Input
@@ -274,12 +288,26 @@ public class JPackageTask extends DefaultTask {
         this.appDescription = appDescription;
     }
 
+    @Deprecated
     public String getModulePath() {
         return modulePath;
     }
 
+    /**
+     * @param modulePath module path
+     * @deprecated use {@link #setModulePaths(List)}
+     */
+    @Deprecated
     public void setModulePath(String modulePath) {
         this.modulePath = modulePath;
+    }
+
+    public List<String> getModulePaths() {
+        return modulePaths;
+    }
+
+    public void setModulePaths(List<String> modulePaths) {
+        this.modulePaths = modulePaths;
     }
 
     public String getLicenseFile() {
@@ -320,6 +348,30 @@ public class JPackageTask extends DefaultTask {
 
     public void setArguments(List<String> arguments) {
         this.arguments = arguments;
+    }
+
+    public List<String> getFileAssociations() {
+        return fileAssociations;
+    }
+
+    public void setFileAssociations(List<String> fileAssociations) {
+        this.fileAssociations = fileAssociations;
+    }
+
+    public List<Launcher> getLaunchers() {
+        return launchers;
+    }
+
+    public void setLaunchers(List<Launcher> launchers) {
+        this.launchers = launchers;
+    }
+
+    public List<String> getAddModules() {
+        return addModules;
+    }
+
+    public void setAddModules(List<String> addModules) {
+        this.addModules = addModules;
     }
 
     public boolean getWinMenu() {
@@ -495,7 +547,7 @@ public class JPackageTask extends DefaultTask {
     }
 
     private String getJPackageFromToolchain() {
-        getLogger().info("Looking for $EXECUTABLE in toolchain");
+        getLogger().info("Looking for " + EXECUTABLE + " in toolchain");
         try {
             JavaToolchainSpec toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
             JavaToolchainService service = getProject().getExtensions().getByType(JavaToolchainService.class);
@@ -524,6 +576,10 @@ public class JPackageTask extends DefaultTask {
     }
 
     private void buildParameters(Collection<String> parameters) {
+        if (modulePath != null && !modulePath.isEmpty()) {
+            getLogger().warn("Parameter modulePath is deprecated and will be removed");
+        }
+
         if (type != ImageType.DEFAULT) {
             addParameter(parameters, "--type", type);
         }
@@ -547,12 +603,39 @@ public class JPackageTask extends DefaultTask {
         addParameter(parameters, "--resource-dir", resourceDir);
         addParameter(parameters, "--temp", temp);
 
-        for (String option : javaOptions) {
-            addParameter(parameters, "--java-options", escape(option));
+        if (modulePaths != null) {
+            for (String path : modulePaths) {
+                addParameter(parameters, "--module-path", path);
+            }
         }
 
-        for (String arg : arguments) {
-            addParameter(parameters, "--arguments", escape(arg));
+        if (javaOptions != null) {
+            for (String option : javaOptions) {
+                addParameter(parameters, "--java-options", escape(option));
+            }
+        }
+
+        if (arguments != null) {
+            for (String arg : arguments) {
+                addParameter(parameters, "--arguments", escape(arg));
+            }
+        }
+
+        if (fileAssociations != null) {
+            for (String association : fileAssociations) {
+                addFileParameter(parameters, "--file-associations", association);
+            }
+        }
+
+        if (launchers != null) {
+            for (Launcher launcher : launchers) {
+                addParameter(parameters, "--add-launcher",
+                    launcher.getName() + "=" + launcher.getAbsolutePath());
+            }
+        }
+
+        if (addModules != null && !addModules.isEmpty()) {
+            addParameter(parameters, "--add-modules", String.join(",", addModules));
         }
 
         if (isMac()) {
@@ -581,29 +664,29 @@ public class JPackageTask extends DefaultTask {
     }
 
     private void execute(String cmd) throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder();
         List<String> parameters = new ArrayList<>();
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
         buildParameters(parameters);
-        processBuilder.command(parameters);
-        Process process = processBuilder.start();
-        getLogger().info("jpackage output:");
-        logCmdOutput(process.getInputStream());
-        logCmdOutput(process.getErrorStream());
-        int status = process.waitFor();
-        if (status != 0) {
-            throw new GradleException("Error while executing $EXECUTABLE");
-        }
-    }
 
-    private void logCmdOutput(InputStream stream) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+        Process process = new ProcessBuilder()
+            .redirectErrorStream(true)
+            .command(parameters)
+            .start();
+
+        getLogger().info("jpackage output:");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 getLogger().info(line);
             }
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
+        }
+
+        int status = process.waitFor();
+        if (status != 0) {
+            throw new GradleException("Error while executing " + EXECUTABLE);
         }
     }
 
@@ -648,6 +731,20 @@ public class JPackageTask extends DefaultTask {
         getLogger().info("  " + name + " " + value);
         params.add(name);
         params.add(value);
+    }
+
+    private void addFileParameter(Collection<String> params, String name, String value) {
+        if (value == null) {
+            return;
+        }
+
+        File file = new File(value);
+
+        if (!file.exists()) {
+            throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
+        }
+
+        addParameter(params, name, file.getAbsolutePath());
     }
 
     private void addParameter(Collection<String> params, String name, boolean value) {
