@@ -40,7 +40,7 @@ public class JPackageTask extends DefaultTask {
     private String appName = "";
 
     @Input
-    private String appVersion = (String) getProject().getVersion();
+    private String appVersion = getProject().getVersion().toString();
 
     @Input
     private String vendor = "";
