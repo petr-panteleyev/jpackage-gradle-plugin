@@ -41,6 +41,9 @@ public class JPackageTask extends DefaultTask {
     private String appName = "";
 
     @Input
+    private String appImage = "";
+
+    @Input
     private String appVersion = getProject().getVersion().toString();
 
     @Input
@@ -126,6 +129,9 @@ public class JPackageTask extends DefaultTask {
     @Input
     private boolean winPerUserInstall = false;
 
+    @Input
+    private boolean winConsole = false;
+
     // OS X specific parameters
     @Input
     private String macPackageIdentifier = "";
@@ -190,6 +196,14 @@ public class JPackageTask extends DefaultTask {
 
     public void setAppName(String appName) {
         this.appName = appName;
+    }
+
+    public String getAppImage() {
+        return appImage;
+    }
+
+    public void setAppImage(String appImage) {
+        this.appImage = appImage;
     }
 
     public String getAppVersion() {
@@ -422,6 +436,14 @@ public class JPackageTask extends DefaultTask {
         this.winPerUserInstall = winPerUserInstall;
     }
 
+    public boolean getWinConsole() {
+        return winConsole;
+    }
+
+    public void setWinConsole(boolean winConsole) {
+        this.winConsole = winConsole;
+    }
+
     public String getMacPackageIdentifier() {
         return macPackageIdentifier;
     }
@@ -586,6 +608,7 @@ public class JPackageTask extends DefaultTask {
 
         addParameter(parameters, "--verbose", verbose);
         addParameter(parameters, "--name", appName);
+        addParameter(parameters, "--app-image", appImage);
         addParameter(parameters, "--app-version", appVersion);
         addParameter(parameters, "--dest", destination);
         addParameter(parameters, "--copyright", copyright);
@@ -652,6 +675,7 @@ public class JPackageTask extends DefaultTask {
             addParameter(parameters, "--win-menu-group", winMenuGroup);
             addParameter(parameters, "--win-shortcut", winShortcut);
             addParameter(parameters, "--win-per-user-install", winPerUserInstall);
+            addParameter(parameters, "--win-console", winConsole);
         } else if (isLinux()) {
             addParameter(parameters, "--linux-package-name", linuxPackageName);
             addParameter(parameters, "--linux-deb-maintainer", linuxDebMaintainer);

@@ -50,6 +50,7 @@ windows {
 <tr><th colspan="2">Generic</th></tr>
 <tr><td>type</td><td>--type &lt;type></td></tr>
 <tr><td>appName</td><td>--name &lt;name></td></tr>
+<tr><td>appImage</td><td>--app-image &lt;name></td></tr>
 <tr><td>appVersion</td><td>--app-version &lt;version></td></tr>
 <tr><td>destination</td><td>--dest &lt;destination path></td></tr>
 <tr><td>copyright</td><td>--copyright &lt;copyright string></td></tr>
@@ -79,6 +80,7 @@ windows {
 <tr><td>winMenuGroup</td><td>--win-menu-group &lt;menu group name></td></tr>
 <tr><td>winShortcut</td><td>--win-shortcut</td></tr>
 <tr><td>winPerUserInstall</td><td>--win-per-user-install</td></tr>
+<tr><td>winConsole</td><td>--win-console</td></tr>
 
 <tr><th colspan="2">OS X</th></tr>
 <tr><td>macPackageIdentifier</td><td>--mac-package-identifier &lt;ID string></td></tr>
