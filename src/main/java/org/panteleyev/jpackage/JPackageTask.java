@@ -15,165 +15,73 @@ import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.jvm.toolchain.JavaToolchainSpec;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
 import static org.panteleyev.jpackage.OsUtil.isWindows;
 import static org.panteleyev.jpackage.StringUtil.escape;
 
+@SuppressWarnings({"SameParameterValue", "unused"})
 public class JPackageTask extends DefaultTask {
     public static final String EXECUTABLE = "jpackage";
 
-    @Input
     private boolean verbose = false;
-
-    @Input
     private ImageType type = ImageType.DEFAULT;
-
-    @Input
     private String appName = "";
-
-    @Input
     private String appImage = "";
-
-    @Input
     private String appVersion = getProject().getVersion().toString();
-
-    @Input
     private String vendor = "";
-
-    @Input
     private String icon = "";
-
-    @Input
     private String runtimeImage = "";
-
-    @Input
     private String input = "";
-
-    @Input
     private String installDir = "";
-
-    @Input
     private String destination = "";
-
-    @Input
     private String module = "";
-
-    @Input
     private String mainClass = "";
-
-    @Input
     private String mainJar = "";
-
-    @Input
     private String copyright = "";
-
-    @Input
     private String appDescription = "";
-
-    @Input
-    @Deprecated
-    private String modulePath = "";
-
-    @Input
-    private List<String> modulePaths = Collections.emptyList();
-
-    @Input
+    private List<String> modulePaths = new ArrayList<>();
     private String licenseFile = "";
-
-    @Input
     private String resourceDir = "";
-
-    @Input
     private String temp = "";
-
-    @Input
-    private List<String> javaOptions = Collections.emptyList();
-
-    @Input
-    private List<String> arguments = Collections.emptyList();
-
-    @Input
-    private List<String> fileAssociations = Collections.emptyList();
-
-    @Input
-    private List<Launcher> launchers = Collections.emptyList();
-
-    @Input
-    private List<String> addModules = Collections.emptyList();
+    private List<String> javaOptions = new ArrayList<>();
+    private List<String> arguments = new ArrayList<>();
+    private List<String> fileAssociations = new ArrayList<>();
+    private List<Launcher> launchers = new ArrayList<>();
+    private List<String> addModules = new ArrayList<>();
 
     // Windows specific parameters
-    @Input
     private boolean winMenu = false;
-
-    @Input
     private boolean winDirChooser = false;
-
-    @Input
     private String winUpgradeUuid = "";
-
-    @Input
     private String winMenuGroup = "";
-
-    @Input
     private boolean winShortcut = false;
-
-    @Input
     private boolean winPerUserInstall = false;
-
-    @Input
     private boolean winConsole = false;
 
     // OS X specific parameters
-    @Input
     private String macPackageIdentifier = "";
-
-    @Input
     private String macPackageName = "";
-
-    @Input
     private String macPackageSigningPrefix = "";
-
-    @Input
     private boolean macSign = false;
-
-    @Input
     private String macSigningKeychain = "";
-
-    @Input
     private String macSigningKeyUserName = "";
 
     // Linux specific parameters
-
-    @Input
     private String linuxPackageName = "";
-
-    @Input
     private String linuxDebMaintainer = "";
-
-    @Input
     private String linuxMenuGroup = "";
-
-    @Input
     private String linuxRpmLicenseType = "";
-
-    @Input
     private String linuxAppRelease = "";
-
-    @Input
     private String linuxAppCategory = "";
-
-    @Input
     private boolean linuxShortcut = false;
 
+    @Input
     public boolean getVerbose() {
         return verbose;
     }
@@ -182,6 +90,7 @@ public class JPackageTask extends DefaultTask {
         this.verbose = verbose;
     }
 
+    @Input
     public ImageType getType() {
         return type;
     }
@@ -190,6 +99,7 @@ public class JPackageTask extends DefaultTask {
         this.type = type;
     }
 
+    @Input
     public String getAppName() {
         return appName;
     }
@@ -198,6 +108,7 @@ public class JPackageTask extends DefaultTask {
         this.appName = appName;
     }
 
+    @Input
     public String getAppImage() {
         return appImage;
     }
@@ -206,6 +117,7 @@ public class JPackageTask extends DefaultTask {
         this.appImage = appImage;
     }
 
+    @Input
     public String getAppVersion() {
         return appVersion;
     }
@@ -214,6 +126,7 @@ public class JPackageTask extends DefaultTask {
         this.appVersion = appVersion;
     }
 
+    @Input
     public String getVendor() {
         return vendor;
     }
@@ -222,6 +135,7 @@ public class JPackageTask extends DefaultTask {
         this.vendor = vendor;
     }
 
+    @Input
     public String getIcon() {
         return icon;
     }
@@ -230,6 +144,7 @@ public class JPackageTask extends DefaultTask {
         this.icon = icon;
     }
 
+    @Input
     public String getRuntimeImage() {
         return runtimeImage;
     }
@@ -238,6 +153,7 @@ public class JPackageTask extends DefaultTask {
         this.runtimeImage = runtimeImage;
     }
 
+    @Input
     public String getInput() {
         return input;
     }
@@ -246,6 +162,7 @@ public class JPackageTask extends DefaultTask {
         this.input = input;
     }
 
+    @Input
     public String getInstallDir() {
         return installDir;
     }
@@ -254,6 +171,7 @@ public class JPackageTask extends DefaultTask {
         this.installDir = installDir;
     }
 
+    @Input
     public String getDestination() {
         return destination;
     }
@@ -262,6 +180,7 @@ public class JPackageTask extends DefaultTask {
         this.destination = destination;
     }
 
+    @Input
     public String getModule() {
         return module;
     }
@@ -270,6 +189,7 @@ public class JPackageTask extends DefaultTask {
         this.module = module;
     }
 
+    @Input
     public String getMainClass() {
         return mainClass;
     }
@@ -278,6 +198,7 @@ public class JPackageTask extends DefaultTask {
         this.mainClass = mainClass;
     }
 
+    @Input
     public String getMainJar() {
         return mainJar;
     }
@@ -286,6 +207,7 @@ public class JPackageTask extends DefaultTask {
         this.mainJar = mainJar;
     }
 
+    @Input
     public String getCopyright() {
         return copyright;
     }
@@ -294,6 +216,7 @@ public class JPackageTask extends DefaultTask {
         this.copyright = copyright;
     }
 
+    @Input
     public String getAppDescription() {
         return appDescription;
     }
@@ -302,20 +225,7 @@ public class JPackageTask extends DefaultTask {
         this.appDescription = appDescription;
     }
 
-    @Deprecated
-    public String getModulePath() {
-        return modulePath;
-    }
-
-    /**
-     * @param modulePath module path
-     * @deprecated use {@link #setModulePaths(List)}
-     */
-    @Deprecated
-    public void setModulePath(String modulePath) {
-        this.modulePath = modulePath;
-    }
-
+    @Input
     public List<String> getModulePaths() {
         return modulePaths;
     }
@@ -324,6 +234,7 @@ public class JPackageTask extends DefaultTask {
         this.modulePaths = modulePaths;
     }
 
+    @Input
     public String getLicenseFile() {
         return licenseFile;
     }
@@ -332,6 +243,7 @@ public class JPackageTask extends DefaultTask {
         this.licenseFile = licenseFile;
     }
 
+    @Input
     public String getResourceDir() {
         return resourceDir;
     }
@@ -340,6 +252,7 @@ public class JPackageTask extends DefaultTask {
         this.resourceDir = resourceDir;
     }
 
+    @Input
     public String getTemp() {
         return temp;
     }
@@ -348,6 +261,7 @@ public class JPackageTask extends DefaultTask {
         this.temp = temp;
     }
 
+    @Input
     public List<String> getJavaOptions() {
         return javaOptions;
     }
@@ -356,6 +270,7 @@ public class JPackageTask extends DefaultTask {
         this.javaOptions = javaOptions;
     }
 
+    @Input
     public List<String> getArguments() {
         return arguments;
     }
@@ -364,6 +279,7 @@ public class JPackageTask extends DefaultTask {
         this.arguments = arguments;
     }
 
+    @Input
     public List<String> getFileAssociations() {
         return fileAssociations;
     }
@@ -372,6 +288,7 @@ public class JPackageTask extends DefaultTask {
         this.fileAssociations = fileAssociations;
     }
 
+    @Input
     public List<Launcher> getLaunchers() {
         return launchers;
     }
@@ -380,6 +297,7 @@ public class JPackageTask extends DefaultTask {
         this.launchers = launchers;
     }
 
+    @Input
     public List<String> getAddModules() {
         return addModules;
     }
@@ -388,6 +306,7 @@ public class JPackageTask extends DefaultTask {
         this.addModules = addModules;
     }
 
+    @Input
     public boolean getWinMenu() {
         return winMenu;
     }
@@ -396,6 +315,7 @@ public class JPackageTask extends DefaultTask {
         this.winMenu = winMenu;
     }
 
+    @Input
     public boolean getWinDirChooser() {
         return winDirChooser;
     }
@@ -404,6 +324,7 @@ public class JPackageTask extends DefaultTask {
         this.winDirChooser = winDirChooser;
     }
 
+    @Input
     public String getWinUpgradeUuid() {
         return winUpgradeUuid;
     }
@@ -412,6 +333,7 @@ public class JPackageTask extends DefaultTask {
         this.winUpgradeUuid = winUpgradeUuid;
     }
 
+    @Input
     public String getWinMenuGroup() {
         return winMenuGroup;
     }
@@ -420,6 +342,7 @@ public class JPackageTask extends DefaultTask {
         this.winMenuGroup = winMenuGroup;
     }
 
+    @Input
     public boolean getWinShortcut() {
         return winShortcut;
     }
@@ -428,6 +351,7 @@ public class JPackageTask extends DefaultTask {
         this.winShortcut = winShortcut;
     }
 
+    @Input
     public boolean getWinPerUserInstall() {
         return winPerUserInstall;
     }
@@ -436,6 +360,7 @@ public class JPackageTask extends DefaultTask {
         this.winPerUserInstall = winPerUserInstall;
     }
 
+    @Input
     public boolean getWinConsole() {
         return winConsole;
     }
@@ -444,6 +369,7 @@ public class JPackageTask extends DefaultTask {
         this.winConsole = winConsole;
     }
 
+    @Input
     public String getMacPackageIdentifier() {
         return macPackageIdentifier;
     }
@@ -452,6 +378,7 @@ public class JPackageTask extends DefaultTask {
         this.macPackageIdentifier = macPackageIdentifier;
     }
 
+    @Input
     public String getMacPackageName() {
         return macPackageName;
     }
@@ -460,6 +387,7 @@ public class JPackageTask extends DefaultTask {
         this.macPackageName = macPackageName;
     }
 
+    @Input
     public String getMacPackageSigningPrefix() {
         return macPackageSigningPrefix;
     }
@@ -468,6 +396,7 @@ public class JPackageTask extends DefaultTask {
         this.macPackageSigningPrefix = macPackageSigningPrefix;
     }
 
+    @Input
     public boolean getMacSign() {
         return macSign;
     }
@@ -476,6 +405,7 @@ public class JPackageTask extends DefaultTask {
         this.macSign = macSign;
     }
 
+    @Input
     public String getMacSigningKeychain() {
         return macSigningKeychain;
     }
@@ -484,6 +414,7 @@ public class JPackageTask extends DefaultTask {
         this.macSigningKeychain = macSigningKeychain;
     }
 
+    @Input
     public String getMacSigningKeyUserName() {
         return macSigningKeyUserName;
     }
@@ -492,6 +423,7 @@ public class JPackageTask extends DefaultTask {
         this.macSigningKeyUserName = macSigningKeyUserName;
     }
 
+    @Input
     public String getLinuxPackageName() {
         return linuxPackageName;
     }
@@ -500,6 +432,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxPackageName = linuxPackageName;
     }
 
+    @Input
     public String getLinuxDebMaintainer() {
         return linuxDebMaintainer;
     }
@@ -508,6 +441,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxDebMaintainer = linuxDebMaintainer;
     }
 
+    @Input
     public String getLinuxMenuGroup() {
         return linuxMenuGroup;
     }
@@ -516,6 +450,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxMenuGroup = linuxMenuGroup;
     }
 
+    @Input
     public String getLinuxRpmLicenseType() {
         return linuxRpmLicenseType;
     }
@@ -524,6 +459,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxRpmLicenseType = linuxRpmLicenseType;
     }
 
+    @Input
     public String getLinuxAppRelease() {
         return linuxAppRelease;
     }
@@ -532,6 +468,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxAppRelease = linuxAppRelease;
     }
 
+    @Input
     public String getLinuxAppCategory() {
         return linuxAppCategory;
     }
@@ -540,6 +477,7 @@ public class JPackageTask extends DefaultTask {
         this.linuxAppCategory = linuxAppCategory;
     }
 
+    @Input
     public boolean getLinuxShortcut() {
         return linuxShortcut;
     }
@@ -550,115 +488,93 @@ public class JPackageTask extends DefaultTask {
 
     @TaskAction
     public void action() {
-        String jpackage = getJPackageFromToolchain();
-        if (jpackage == null) {
-            jpackage = getJPackageFromJavaHome();
-        }
+        String jpackage = getJPackageFromToolchain()
+            .orElseGet(() -> getJPackageFromJavaHome()
+                .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
+
         getLogger().info("Using: " + jpackage);
+        execute(jpackage);
+    }
 
-        try {
-            execute(jpackage);
-        } catch (Exception ex) {
-            throw new GradleException("Error while executing jpackage", ex);
+    private Optional<String> buildExecutablePath(String home) {
+        String executable = home + File.separator + "bin" + File.separator + EXECUTABLE + (isWindows() ? ".exe" : "");
+        if (new File(executable).exists()) {
+            return Optional.of(executable);
+        } else {
+            getLogger().warn("File {} does not exist", executable);
+            return Optional.empty();
         }
     }
 
-    private String buildExecutablePath(String home) {
-        String executable = home + File.separator + "bin" + File.separator + EXECUTABLE;
-        return isWindows() ? executable + ".exe" : executable;
-    }
-
-    private String getJPackageFromToolchain() {
-        getLogger().info("Looking for " + EXECUTABLE + " in toolchain");
+    private Optional<String> getJPackageFromToolchain() {
+        getLogger().info("Looking for {} in toolchain", EXECUTABLE);
         try {
             JavaToolchainSpec toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
             JavaToolchainService service = getProject().getExtensions().getByType(JavaToolchainService.class);
             Provider<JavaLauncher> defaultLauncher = service.launcherFor(toolchain);
             String home = defaultLauncher.get().getMetadata().getInstallationPath().getAsFile().getAbsolutePath();
-            String executable = buildExecutablePath(home);
-            if (new File(executable).exists()) {
-                return executable;
-            } else {
-                getLogger().warn("File {} does not exist", executable);
-                return null;
-            }
+
+            getLogger().info("toolchain: " + home);
+            return buildExecutablePath(home);
         } catch (Exception ex) {
-            getLogger().warn("Toolchain is not configured");
-            return null;
+            getLogger().info("Toolchain is not configured");
+            return Optional.empty();
         }
     }
 
-    private String getJPackageFromJavaHome() {
+    private Optional<String> getJPackageFromJavaHome() {
         getLogger().info("Getting {} from java.home", EXECUTABLE);
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
-            throw new GradleException("java.home is not set");
+            getLogger().error("java.home is not set");
+            return Optional.empty();
         }
         return buildExecutablePath(javaHome);
     }
 
     private void buildParameters(Collection<String> parameters) {
-        if (modulePath != null && !modulePath.isEmpty()) {
-            getLogger().warn("Parameter modulePath is deprecated and will be removed");
-        }
-
         if (type != ImageType.DEFAULT) {
             addParameter(parameters, "--type", type);
         }
 
         addParameter(parameters, "--verbose", verbose);
         addParameter(parameters, "--name", appName);
-        addParameter(parameters, "--app-image", appImage);
         addParameter(parameters, "--app-version", appVersion);
-        addParameter(parameters, "--dest", destination);
         addParameter(parameters, "--copyright", copyright);
         addParameter(parameters, "--description", appDescription);
-        addParameter(parameters, "--runtime-image", runtimeImage);
-        addParameter(parameters, "--input", input);
         addParameter(parameters, "--install-dir", installDir);
         addParameter(parameters, "--vendor", vendor);
         addParameter(parameters, "--module", module);
         addParameter(parameters, "--main-class", mainClass);
         addParameter(parameters, "--main-jar", mainJar);
-        addParameter(parameters, "--module-path", modulePath);
-        addParameter(parameters, "--icon", icon);
-        addParameter(parameters, "--license-file", licenseFile);
-        addParameter(parameters, "--resource-dir", resourceDir);
-        addParameter(parameters, "--temp", temp);
-
-        if (modulePaths != null) {
-            for (String path : modulePaths) {
-                addParameter(parameters, "--module-path", path);
-            }
-        }
-
-        if (javaOptions != null) {
-            for (String option : javaOptions) {
-                addParameter(parameters, "--java-options", escape(option));
-            }
-        }
-
-        if (arguments != null) {
-            for (String arg : arguments) {
-                addParameter(parameters, "--arguments", escape(arg));
-            }
-        }
-
-        if (fileAssociations != null) {
-            for (String association : fileAssociations) {
-                addFileParameter(parameters, "--file-associations", association);
-            }
-        }
-
-        if (launchers != null) {
-            for (Launcher launcher : launchers) {
-                addParameter(parameters, "--add-launcher",
-                    launcher.getName() + "=" + launcher.getAbsolutePath());
-            }
-        }
-
         if (addModules != null && !addModules.isEmpty()) {
             addParameter(parameters, "--add-modules", String.join(",", addModules));
+        }
+        for (String arg : arguments) {
+            addParameter(parameters, "--arguments", escape(arg));
+        }
+        for (String option : javaOptions) {
+            addParameter(parameters, "--java-options", escape(option));
+        }
+
+        // File parameters
+        addFileParameter(parameters, "--app-image", appImage);
+        addFileParameter(parameters, "--dest", destination, false);
+        for (String association : fileAssociations) {
+            addFileParameter(parameters, "--file-associations", association);
+        }
+        addFileParameter(parameters, "--icon", icon);
+        addFileParameter(parameters, "--input", input);
+        addFileParameter(parameters, "--license-file", licenseFile);
+        for (String path : modulePaths) {
+            addFileParameter(parameters, "--module-path", path);
+        }
+        addFileParameter(parameters, "--resource-dir", resourceDir);
+        addFileParameter(parameters, "--runtime-image", runtimeImage);
+        addFileParameter(parameters, "--temp", temp);
+        for (Launcher launcher : launchers) {
+            addParameter(parameters, "--add-launcher",
+                launcher.getName() + "=" + launcher.getAbsolutePath());
         }
 
         if (isMac()) {
@@ -666,8 +582,8 @@ public class JPackageTask extends DefaultTask {
             addParameter(parameters, "--mac-package-name", macPackageName);
             addParameter(parameters, "--mac-package-signing-prefix", macPackageSigningPrefix);
             addParameter(parameters, "--mac-sign", macSign);
-            addParameter(parameters, "--mac-signing-keychain", macSigningKeychain);
             addParameter(parameters, "--mac-signing-key-user-name", macSigningKeyUserName);
+            addFileParameter(parameters, "--mac-signing-keychain", macSigningKeychain);
         } else if (isWindows()) {
             addParameter(parameters, "--win-menu", winMenu);
             addParameter(parameters, "--win-dir-chooser", winDirChooser);
@@ -687,30 +603,32 @@ public class JPackageTask extends DefaultTask {
         }
     }
 
-    private void execute(String cmd) throws Exception {
+    private void execute(String cmd) {
         List<String> parameters = new ArrayList<>();
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
         buildParameters(parameters);
 
-        Process process = new ProcessBuilder()
-            .redirectErrorStream(true)
-            .command(parameters)
-            .start();
+        try {
+            Process process = new ProcessBuilder()
+                .redirectErrorStream(true)
+                .command(parameters)
+                .start();
 
-        getLogger().info("jpackage output:");
+            getLogger().info("jpackage output:");
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                getLogger().info(line);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    getLogger().info(line);
+                }
             }
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
 
-        int status = process.waitFor();
-        if (status != 0) {
-            throw new GradleException("Error while executing " + EXECUTABLE);
+            int status = process.waitFor();
+            if (status != 0) {
+                throw new GradleException("Error while executing " + EXECUTABLE);
+            }
+        } catch (Exception ex) {
+            throw new GradleException("Error while executing " + EXECUTABLE, ex);
         }
     }
 
@@ -757,14 +675,28 @@ public class JPackageTask extends DefaultTask {
         params.add(value);
     }
 
-    private void addFileParameter(Collection<String> params, String name, String value) {
+    private void addParameter(Collection<String> params, String name, File value) {
         if (value == null) {
             return;
         }
 
-        File file = new File(value);
+        String path = value.getAbsolutePath();
+        getLogger().info("  " + name + " " + path);
+        params.add(name);
+        params.add(path);
+    }
 
-        if (!file.exists()) {
+    private void addFileParameter(Collection<String> params, String name, String value) {
+        addFileParameter(params, name, value, true);
+    }
+
+    private void addFileParameter(Collection<String> params, String name, String value, boolean mustExist) {
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+
+        File file = getProject().file(value);
+        if (mustExist && !file.exists()) {
             throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
         }
 

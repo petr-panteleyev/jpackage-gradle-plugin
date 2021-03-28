@@ -4,11 +4,12 @@ Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available s
 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
 [![Gradle](https://img.shields.io/badge/Gradle-6.7%2B-green)](https://gradle.org/)
+[![Java](https://img.shields.io/badge/Java-8-orange?logo=java)](https://www.oracle.com/java/technologies/javase-downloads.html)
 [![BSD-2 license](https://img.shields.io/badge/License-BSD--2-informational.svg)](LICENSE)
 
 ## Finding jpackage
 
-Plugin searches for jpackage executable using the following priority list:
+Plugin searches for ```jpackage``` executable using the following priority list:
 
 1. Configured toolchain
 
@@ -46,60 +47,63 @@ windows {
 ### Parameters
 
 <table>
-<tr><th>Parameter</th><th>JPackage Argument</th></tr>
-<tr><th colspan="2">Generic</th></tr>
-<tr><td>type</td><td>--type &lt;type></td></tr>
-<tr><td>appName</td><td>--name &lt;name></td></tr>
-<tr><td>appImage</td><td>--app-image &lt;name></td></tr>
-<tr><td>appVersion</td><td>--app-version &lt;version></td></tr>
-<tr><td>destination</td><td>--dest &lt;destination path></td></tr>
-<tr><td>copyright</td><td>--copyright &lt;copyright string></td></tr>
-<tr><td>appDescription</td><td>--description &lt;description string></td></tr>
-<tr><td>vendor</td><td>--vendor &lt;vendor string></td></tr>
-<tr><td>runtimeImage</td><td>--runtime-image &lt;file path></td></tr>
-<tr><td>input</td><td>--input &lt;input path></td></tr>
-<tr><td>installDir</td><td>--install-dir &lt;file path></td></tr>
-<tr><td>module</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
-<tr><td>modulePaths</td><td>--module-path &lt;module path>...</td></tr>
-<tr><td>mainClass</td><td>--main-class &lt;class name></td></tr>
-<tr><td>mainJar</td><td>--main-jar &lt;main jar file></td></tr>
-<tr><td>icon</td><td>--icon &lt;icon file path></td></tr>
-<tr><td>verbose</td><td>--verbose</td></tr>
-<tr><td>arguments</td><td>--arguments &lt;main class arguments></td></tr>
-<tr><td>licenseFile</td><td>--license-file &lt;license file path></td></tr>
-<tr><td>resourceDir</td><td>--resource-dir &lt;resource dir path></td></tr>
-<tr><td>temp</td><td>--temp &lt;temp dir path></td></tr>
-<tr><td>fileAssociations</td><td>--file-associations &lt;file association property file></td></tr>
-<tr><td>launchers</td><td>--add-launcher &lt;launcher property file></td></tr>
-<tr><td>addModules</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
+<tr><th>Parameter</th><th>Type</th><th>JPackage Argument</th></tr>
+<tr><th colspan="3">Generic</th></tr>
+<tr><td>type</td><td>ImageType</td><td>--type &lt;type></td></tr>
+<tr><td>appName</td><td>String</td><td>--name &lt;name></td></tr>
+<tr><td>appVersion</td><td>String</td><td>--app-version &lt;version></td></tr>
+<tr><td>copyright</td><td>String</td><td>--copyright &lt;copyright string></td></tr>
+<tr><td>appDescription</td><td>String</td><td>--description &lt;description string></td></tr>
+<tr><td>vendor</td><td>String</td><td>--vendor &lt;vendor string></td></tr>
+<tr><td>installDir</td><td>String</td><td>--install-dir &lt;file path></td></tr>
+<tr><td>module</td><td>String</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
+<tr><td>mainClass</td><td>String</td><td>--main-class &lt;class name></td></tr>
+<tr><td>mainJar</td><td>String</td><td>--main-jar &lt;main jar file></td></tr>
+<tr><td>verbose</td><td>String</td><td>--verbose</td></tr>
+<tr><td>arguments</td><td>String</td><td>--arguments &lt;main class arguments></td></tr>
+<tr><td>launchers</td><td>Launcher</td><td>--add-launcher &lt;name>=&lt;property file></td></tr>
+<tr><td>addModules</td><td>String</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
+<tr><td>appImage</td><td>String <sup>(*)</sup></td><td>--app-image &lt;name></td></tr>
+<tr><td>destination</td><td>String <sup>(*)</sup></td><td>--dest &lt;destination path></td></tr>
+<tr><td>fileAssociations</td><td>String <sup>(*)</sup></td><td>--file-associations &lt;file association property file></td></tr>
+<tr><td>icon</td><td>String <sup>(*)</sup></td><td>--icon &lt;icon file path></td></tr>
+<tr><td>input</td><td>String <sup>(*)</sup></td><td>--input &lt;input path></td></tr>
+<tr><td>licenseFile</td><td>String <sup>(*)</sup></td><td>--license-file &lt;license file path></td></tr>
+<tr><td>modulePaths</td><td>String <sup>(*)</sup></td><td>--module-path &lt;module path></td></tr>
+<tr><td>resourceDir</td><td>String <sup>(*)</sup></td><td>--resource-dir &lt;resource dir path></td></tr>
+<tr><td>runtimeImage</td><td>String <sup>(*)</sup></td><td>--runtime-image &lt;file path></td></tr>
+<tr><td>temp</td><td>String <sup>(*)</sup></td><td>--temp &lt;temp dir path></td></tr>
 
-<tr><th colspan="2">Windows</th></tr>
-<tr><td>winMenu</td><td>--win-menu</td></tr>
-<tr><td>winDirChooser</td><td>--win-dir-chooser</td></tr>
-<tr><td>winUpgradeUuid</td><td>--win-upgrade-uuid &lt;id string></td></tr>
-<tr><td>winMenuGroup</td><td>--win-menu-group &lt;menu group name></td></tr>
-<tr><td>winShortcut</td><td>--win-shortcut</td></tr>
-<tr><td>winPerUserInstall</td><td>--win-per-user-install</td></tr>
-<tr><td>winConsole</td><td>--win-console</td></tr>
+<tr><th colspan="3">Windows</th></tr>
+<tr><td>winMenu</td><td>Boolean</td><td>--win-menu</td></tr>
+<tr><td>winDirChooser</td><td>Boolean</td><td>--win-dir-chooser</td></tr>
+<tr><td>winUpgradeUuid</td><td>String</td><td>--win-upgrade-uuid &lt;id string></td></tr>
+<tr><td>winMenuGroup</td><td>String</td><td>--win-menu-group &lt;menu group name></td></tr>
+<tr><td>winShortcut</td><td>Boolean</td><td>--win-shortcut</td></tr>
+<tr><td>winPerUserInstall</td><td>Boolean</td><td>--win-per-user-install</td></tr>
+<tr><td>winConsole</td><td>Boolean</td><td>--win-console</td></tr>
 
-<tr><th colspan="2">OS X</th></tr>
-<tr><td>macPackageIdentifier</td><td>--mac-package-identifier &lt;ID string></td></tr>
-<tr><td>macPackageName</td><td>--mac-package-name &lt;name string></td></tr>
-<tr><td>macPackageSigningPrefix</td><td>--mac-package-signing-prefix &lt;prefix string></td></tr>
-<tr><td>macSign</td><td>--mac-sign</td></tr>
-<tr><td>macSigningKeychain</td><td>--mac-signing-keychain &lt;file path></td></tr>
-<tr><td>macSigningKeyUserName</td><td>--mac-signing-key-user-name &lt;team name></td></tr>
+<tr><th colspan="3">OS X</th></tr>
+<tr><td>macPackageIdentifier</td><td>String</td><td>--mac-package-identifier &lt;ID string></td></tr>
+<tr><td>macPackageName</td><td>String</td><td>--mac-package-name &lt;name string></td></tr>
+<tr><td>macPackageSigningPrefix</td><td>String</td><td>--mac-package-signing-prefix &lt;prefix string></td></tr>
+<tr><td>macSign</td><td>Boolean</td><td>--mac-sign</td></tr>
+<tr><td>macSigningKeychain</td><td>String <sup>(*)</sup></td><td>--mac-signing-keychain &lt;file path></td></tr>
+<tr><td>macSigningKeyUserName</td><td>String</td><td>--mac-signing-key-user-name &lt;team name></td></tr>
 
-<tr><th colspan="2">Linux</th></tr>
-<tr><td>linuxPackageName</td><td>--linux-package-name &lt;package name></td></tr>
-<tr><td>linuxDebMaintainer</td><td>--linux-deb-maintainer &lt;email address></td></tr>
-<tr><td>linuxMenuGroup</td><td>--linux-menu-group &lt;menu-group-name></td></tr>
-<tr><td>linuxRpmLicenseType</td><td>--linux-rpm-license-type &lt;type string></td></tr>
-<tr><td>linuxAppRelease</td><td>--linux-app-release &lt;release value></td></tr>
-<tr><td>linuxAppCategory</td><td>--linux-app-category &lt;category value></td></tr>
-<tr><td>linuxShortcut</td><td>--linux-shortcut</td></tr>
+<tr><th colspan="3">Linux</th></tr>
+<tr><td>linuxPackageName</td><td>String</td><td>--linux-package-name &lt;package name></td></tr>
+<tr><td>linuxDebMaintainer</td><td>String</td><td>--linux-deb-maintainer &lt;email address></td></tr>
+<tr><td>linuxMenuGroup</td><td>String</td><td>--linux-menu-group &lt;menu-group-name></td></tr>
+<tr><td>linuxRpmLicenseType</td><td>String</td><td>--linux-rpm-license-type &lt;type string></td></tr>
+<tr><td>linuxAppRelease</td><td>String</td><td>--linux-app-release &lt;release value></td></tr>
+<tr><td>linuxAppCategory</td><td>String</td><td>--linux-app-category &lt;category value></td></tr>
+<tr><td>linuxShortcut</td><td>Boolean</td><td>--linux-shortcut</td></tr>
 
 </table>
+
+<sup>(*)</sup> - these parameters represent file or directory path and are resolved relative to the project root unless
+they contain an absolute path.
 
 ### Image Type
 
@@ -129,55 +133,11 @@ argumens = listOf(
 )
 ```
 
-## Samples
+## Examples
 
-### Application image with full JRE
-
-```kotlin
-task("copyDependencies", Copy::class) {
-    from(configurations.runtimeClasspath).into("$buildDir/jmods")
-}
-
-task("copyJar", Copy::class) {
-    from(tasks.jar).into("$buildDir/jmods")
-}
-
-tasks.withType<org.panteleyev.jpackage.JPackageTask> {
-    dependsOn("build")
-    dependsOn("copyDependencies")
-    dependsOn("copyJar")
-
-    appName = "Application Name"
-    appVersion = project.version as String
-    vendor = "app.org"
-    copyright = "Copyright (c) 2020 Vendor"
-    runtimeImage = System.getProperty("java.home")
-    module = "org.app.module/org.app.MainClass"
-    modulePath = "$buildDir/jmods"
-    destination = "$buildDir/dist"
-    javaOptions = listOf(
-        "--enable-preview",
-        "-Dfile.encoding=UTF-8"
-    )
-
-    mac {
-        icon = "icons/icons.icns"
-    }
-    
-    windows {
-        icon = "icons/icons.ico"
-        winMenu = true
-        winDirChooser = true
-    }
-}
-```
-
-## Gradle Version Compatibility
-
-| Plugin | Gradle |
-|---|---|
-|0.0.3+|6.7+|
+* [Modular Application with Full Runtime](doc/examples/ModularFullRuntime.md)
+* [Non-Modular Application](doc/examples/Non-ModularApplication.md)
 
 ## References
 
-[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/15/jpackage/packaging-tool-user-guide.pdf)
+[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/16/jpackage/packaging-tool-user-guide.pdf)

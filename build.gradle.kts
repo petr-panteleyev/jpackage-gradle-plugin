@@ -3,7 +3,7 @@
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
 group = "org.panteleyev"
-version = "1.1.1"
+version = "1.2.0"
 
 plugins {
     java
@@ -13,11 +13,11 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    testImplementation("org.testng:testng:6.14.3")
+    testImplementation("org.testng:testng:7.3.0")
 }
 
 java {
