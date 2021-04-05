@@ -27,7 +27,7 @@ import static org.panteleyev.jpackage.StringUtil.escape;
 
 @SuppressWarnings({"SameParameterValue", "unused"})
 public class JPackageTask extends DefaultTask {
-    public static final String EXECUTABLE = "jpackage";
+    private static final String EXECUTABLE = "jpackage";
 
     private boolean verbose = false;
     private ImageType type = ImageType.DEFAULT;
@@ -80,6 +80,16 @@ public class JPackageTask extends DefaultTask {
     private String linuxAppRelease = "";
     private String linuxAppCategory = "";
     private boolean linuxShortcut = false;
+
+    // Additional parameters
+    private List<String> additionalParameters = new ArrayList<>();
+
+    // Plugin internal options
+    private final boolean dryRun;
+
+    public JPackageTask() {
+        dryRun = Boolean.getBoolean("jpackage.dryRun");
+    }
 
     @Input
     public boolean getVerbose() {
@@ -486,8 +496,21 @@ public class JPackageTask extends DefaultTask {
         this.linuxShortcut = linuxShortcut;
     }
 
+    @Input
+    public List<String> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
+    public void setAdditionalParameters(List<String> additionalParameters) {
+        this.additionalParameters = additionalParameters;
+    }
+
     @TaskAction
     public void action() {
+        if (dryRun) {
+            getLogger().lifecycle("Executing jpackage plugin in dry run mode");
+        }
+
         String jpackage = getJPackageFromToolchain()
             .orElseGet(() -> getJPackageFromJavaHome()
                 .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
@@ -573,8 +596,12 @@ public class JPackageTask extends DefaultTask {
         addFileParameter(parameters, "--runtime-image", runtimeImage);
         addFileParameter(parameters, "--temp", temp);
         for (Launcher launcher : launchers) {
+            File launcherFile = getProject().file(launcher.getFilePath());
+            if (!launcherFile.exists()) {
+                throw new GradleException("Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
+            }
             addParameter(parameters, "--add-launcher",
-                launcher.getName() + "=" + launcher.getAbsolutePath());
+                launcher.getName() + "=" + launcherFile.getAbsolutePath());
         }
 
         if (isMac()) {
@@ -601,6 +628,11 @@ public class JPackageTask extends DefaultTask {
             addParameter(parameters, "--linux-app-category", linuxAppCategory);
             addParameter(parameters, "--linux-shortcut", linuxShortcut);
         }
+
+        // Additional options
+        for (String option : additionalParameters) {
+            addAdditionalParameter(parameters, option);
+        }
     }
 
     private void execute(String cmd) {
@@ -608,13 +640,17 @@ public class JPackageTask extends DefaultTask {
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
         buildParameters(parameters);
 
+        if (dryRun) {
+            return;
+        }
+
         try {
             Process process = new ProcessBuilder()
                 .redirectErrorStream(true)
                 .command(parameters)
                 .start();
 
-            getLogger().info("jpackage output:");
+            getLogger().info(EXECUTABLE + " output:");
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -718,5 +754,13 @@ public class JPackageTask extends DefaultTask {
         }
 
         addParameter(params, name, value.getValue());
+    }
+
+    private void addAdditionalParameter(Collection<String> params, String parameter) {
+        if (parameter == null || parameter.isEmpty()) {
+            return;
+        }
+        getLogger().info("  " + parameter);
+        params.add(parameter);
     }
 }

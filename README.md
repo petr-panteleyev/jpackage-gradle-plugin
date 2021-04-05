@@ -61,7 +61,6 @@ windows {
 <tr><td>mainJar</td><td>String</td><td>--main-jar &lt;main jar file></td></tr>
 <tr><td>verbose</td><td>String</td><td>--verbose</td></tr>
 <tr><td>arguments</td><td>String</td><td>--arguments &lt;main class arguments></td></tr>
-<tr><td>launchers</td><td>Launcher</td><td>--add-launcher &lt;name>=&lt;property file></td></tr>
 <tr><td>addModules</td><td>String</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
 <tr><td>appImage</td><td>String <sup>(*)</sup></td><td>--app-image &lt;name></td></tr>
 <tr><td>destination</td><td>String <sup>(*)</sup></td><td>--dest &lt;destination path></td></tr>
@@ -73,6 +72,7 @@ windows {
 <tr><td>resourceDir</td><td>String <sup>(*)</sup></td><td>--resource-dir &lt;resource dir path></td></tr>
 <tr><td>runtimeImage</td><td>String <sup>(*)</sup></td><td>--runtime-image &lt;file path></td></tr>
 <tr><td>temp</td><td>String <sup>(*)</sup></td><td>--temp &lt;temp dir path></td></tr>
+<tr><td>launchers</td><td>Launcher <sup>(*)</sup></td><td>--add-launcher &lt;name>=&lt;property file></td></tr>
 
 <tr><th colspan="3">Windows</th></tr>
 <tr><td>winMenu</td><td>Boolean</td><td>--win-menu</td></tr>
@@ -131,6 +131,35 @@ argumens = listOf(
     "Argument with spaces",
     "Argument with \"quotes\""
 )
+```
+
+### Additional Options
+
+Additional options allow passing ```jpackage``` command line options not supported by the plugin. These parameters
+are passed as is without any transformation.
+
+_Example:_
+
+```kotlin
+additionalOptions = listOf(
+    "--jlink-options",
+    "--bind-services"
+)
+```
+
+## Logging
+
+Plugin uses ```LogLevel.INFO``` to print various information about toolchain, jpackage parameters, etc. Use gradle 
+option ```--info``` to check this output.
+
+## Dry Run Mode
+
+To execute plugin tasks in dry run mode without calling ```jpackage``` set property```jpackage.dryRun``` to true.
+
+_Example:_
+
+```shell
+$ ./gradlew clean build jpackage --info -Djpackage.dryRun=true
 ```
 
 ## Examples

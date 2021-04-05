@@ -4,18 +4,18 @@
  */
 package org.panteleyev.jpackage;
 
-import org.gradle.internal.os.OperatingSystem;
+import static org.gradle.internal.os.OperatingSystem.current;
 
 abstract class OsUtil {
     static boolean isWindows() {
-        return OperatingSystem.current().isWindows();
+        return current().isWindows();
     }
 
     static boolean isMac() {
-        return OperatingSystem.current().isMacOsX();
+        return current().isMacOsX();
     }
 
     static boolean isLinux() {
-        return OperatingSystem.current().isLinux();
+        return current().isLinux();
     }
 }

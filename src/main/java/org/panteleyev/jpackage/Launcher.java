@@ -5,31 +5,46 @@
 package org.panteleyev.jpackage;
 
 import org.gradle.api.GradleException;
-import java.io.File;
+import java.util.Objects;
 
-public class Launcher {
+public final class Launcher {
     private final String name;
-    private final File file;
+    private final String filePath;
 
     public Launcher(String name, String filePath) {
         if (name == null || name.isEmpty() || filePath == null || filePath.isEmpty()) {
             throw new GradleException("Launcher parameters cannot be null or empty");
         }
 
-        File file = new File(filePath);
-        if (!file.exists()) {
-            throw new GradleException("Launcher file " + file.getAbsolutePath() + " does not exist");
-        }
-
         this.name = name;
-        this.file = file;
+        this.filePath = filePath;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAbsolutePath() {
-        return file.getAbsolutePath();
+    public String getFilePath() {
+        return filePath;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, filePath);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o instanceof Launcher) {
+            Launcher that = (Launcher) o;
+            return Objects.equals(this.name, that.name)
+                && Objects.equals(this.filePath, that.filePath);
+        } else {
+            return false;
+        }
     }
 }

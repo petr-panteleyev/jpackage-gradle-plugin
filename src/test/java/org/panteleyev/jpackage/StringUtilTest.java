@@ -11,7 +11,7 @@ import static org.panteleyev.jpackage.StringUtil.escape;
 import static org.testng.Assert.assertEquals;
 
 @Test
-public class TestStringUtil {
+public class StringUtilTest {
 
     @DataProvider
     private Object[][] dataProvider() {

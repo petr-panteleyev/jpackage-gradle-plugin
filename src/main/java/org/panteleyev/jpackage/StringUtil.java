@@ -13,10 +13,6 @@ abstract class StringUtil {
 
     static String escape(String arg) {
         arg = arg.replaceAll("\"", REPLACER);
-        if (arg.contains(" ")) {
-            arg = SPACE_WRAPPER + arg + SPACE_WRAPPER;
-        }
-
-        return arg;
+        return arg.contains(" ") ? SPACE_WRAPPER + arg + SPACE_WRAPPER : arg;
     }
 }
