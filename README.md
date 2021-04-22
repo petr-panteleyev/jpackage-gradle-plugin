@@ -42,6 +42,12 @@ windows {
     // Generic parameter value for Windows build
     icon = "icons/icons.ico"
 }
+
+linux
+    // Generic parameter values for Linux build
+    icon = "icons/icons.png"
+    installDir = "/usr" // Prefix
+}
 ```
 
 ### Parameters
