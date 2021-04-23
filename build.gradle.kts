@@ -3,7 +3,7 @@
  Licensed under the BSD license. See LICENSE file in the project root for full license information.
  */
 group = "org.panteleyev"
-version = "1.3.0"
+version = "1.3.1"
 
 plugins {
     java
