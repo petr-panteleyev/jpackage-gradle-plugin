@@ -133,15 +133,15 @@ argumens = listOf(
 )
 ```
 
-### Additional Options
+### Additional Parameters
 
-Additional options allow passing ```jpackage``` command line options not supported by the plugin. These parameters
+Additional parameters allow passing ```jpackage``` command line options not supported by the plugin. These parameters
 are passed as is without any transformation.
 
 _Example:_
 
 ```kotlin
-additionalOptions = listOf(
+additionalParameters = listOf(
     "--jlink-options",
     "--bind-services"
 )
