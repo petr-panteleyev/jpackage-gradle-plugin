@@ -7,6 +7,43 @@ Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available s
 [![Java](https://img.shields.io/badge/Java-8-orange?logo=java)](https://www.oracle.com/java/technologies/javase-downloads.html)
 [![BSD-2 license](https://img.shields.io/badge/License-BSD--2-informational.svg)](LICENSE)
 
+## Getting started
+
+Add to your `build.gradle`:
+
+```gradle
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "org.panteleyev:jpackage-gradle-plugin:1.3.1"
+  }
+}
+
+apply plugin: "org.panteleyev.jpackageplugin"
+
+tasks.jpackage {
+    dependsOn("dist")
+
+    input  = "${buildDir}/libs"
+    destination = "${buildDir}/package"
+    mainJar = "your-file-name.jar"
+    mainClass = "com.example.YourMainClass"
+    type = "app-image" // {"app-image", "exe", "msi", "rpm", "deb", "pkg", "dmg"}
+
+    windows {
+        winConsole = true // otherwise errors will just silently throw a "Failed to launch JVM" error
+    }
+}
+```
+
+You should then be able to create a package using `gradle jpackage` (or `gradlew jpackage` on Windows). Use the `--info` flag to see what's happening. 
+
+More examples are listed in [doc/examples/](doc/examples/).
+
 ## Finding jpackage
 
 Plugin searches for ```jpackage``` executable using the following priority list:
