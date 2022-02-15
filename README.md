@@ -59,7 +59,7 @@ windows {
 <tr><td>module</td><td>String</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
 <tr><td>mainClass</td><td>String</td><td>--main-class &lt;class name></td></tr>
 <tr><td>mainJar</td><td>String</td><td>--main-jar &lt;main jar file></td></tr>
-<tr><td>verbose</td><td>String</td><td>--verbose</td></tr>
+<tr><td>verbose</td><td>Boolean</td><td>--verbose</td></tr>
 <tr><td>arguments</td><td>String</td><td>--arguments &lt;main class arguments></td></tr>
 <tr><td>addModules</td><td>String</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
 <tr><td>appImage</td><td>String <sup>(*)</sup></td><td>--app-image &lt;name></td></tr>
