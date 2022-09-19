@@ -89,7 +89,7 @@ public class JPackageTask extends DefaultTask {
     private List<String> additionalParameters = new ArrayList<>();
 
     // JPackage process environment variables
-    private final Map<String, String> jpackageEnvironment = new HashMap<>();
+    private Map<String, String> jpackageEnvironment;
 
     // Plugin internal options
     private final boolean dryRun;
@@ -548,12 +548,13 @@ public class JPackageTask extends DefaultTask {
     }
 
     @Input
+    @org.gradle.api.tasks.Optional
     public Map<String, String> getJpackageEnvironment() {
         return jpackageEnvironment;
     }
 
     public void setJpackageEnvironment(Map<String, String> jpackageEnvironment) {
-        this.jpackageEnvironment.putAll(jpackageEnvironment);
+        this.jpackageEnvironment = jpackageEnvironment;
     }
 
     @TaskAction
