@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
@@ -695,7 +696,11 @@ public class JPackageTask extends DefaultTask {
         }
 
         try {
-            Process process = new ProcessBuilder()
+            ProcessBuilder pb = new ProcessBuilder();
+            Map<String, String> env = pb.environment();
+            env.put("GRADLE_DIR", getProject().getProjectDir().getAbsolutePath());
+            env.put("BUILD_DIR", getProject().getBuildDir().getAbsolutePath());
+            Process process = pb
                 .redirectErrorStream(true)
                 .command(parameters)
                 .start();
