@@ -1,6 +1,6 @@
 /*
- Copyright (c) Petr Panteleyev. All rights reserved.
- Licensed under the BSD license. See LICENSE file in the project root for full license information.
+ Copyright © 2021-2022 Petr Panteleyev <petr@panteleyev.org>
+ SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
 
@@ -13,14 +13,17 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.jvm.toolchain.JavaToolchainSpec;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
 import static org.panteleyev.jpackage.OsUtil.isWindows;
@@ -84,6 +87,9 @@ public class JPackageTask extends DefaultTask {
 
     // Additional parameters
     private List<String> additionalParameters = new ArrayList<>();
+
+    // JPackage process environment variables
+    private final Map<String, String> jpackageEnvironment = new HashMap<>();
 
     // Plugin internal options
     private final boolean dryRun;
@@ -541,6 +547,15 @@ public class JPackageTask extends DefaultTask {
         this.additionalParameters = additionalParameters;
     }
 
+    @Input
+    public Map<String, String> getJpackageEnvironment() {
+        return jpackageEnvironment;
+    }
+
+    public void setJpackageEnvironment(Map<String, String> jpackageEnvironment) {
+        this.jpackageEnvironment.putAll(jpackageEnvironment);
+    }
+
     @TaskAction
     public void action() {
         if (dryRun) {
@@ -548,8 +563,8 @@ public class JPackageTask extends DefaultTask {
         }
 
         String jpackage = getJPackageFromToolchain()
-            .orElseGet(() -> getJPackageFromJavaHome()
-                .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
+                .orElseGet(() -> getJPackageFromJavaHome()
+                        .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
 
         getLogger().info("Using: " + jpackage);
         execute(jpackage);
@@ -608,9 +623,7 @@ public class JPackageTask extends DefaultTask {
         addParameter(parameters, "--main-jar", mainJar);
         if (addModules != null && !addModules.isEmpty()) {
             addParameter(parameters, "--add-modules",
-                addModules.stream()
-                    .map(s -> s.toString())
-                    .collect(Collectors.joining(","))
+                    String.join(",", addModules)
             );
         }
         if (arguments != null) {
@@ -650,7 +663,7 @@ public class JPackageTask extends DefaultTask {
                     throw new GradleException("Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
                 }
                 addParameter(parameters, "--add-launcher",
-                    launcher.getName() + "=" + launcherFile.getAbsolutePath());
+                        launcher.getName() + "=" + launcherFile.getAbsolutePath());
             }
         }
 
@@ -695,10 +708,30 @@ public class JPackageTask extends DefaultTask {
         }
 
         try {
-            Process process = new ProcessBuilder()
-                .redirectErrorStream(true)
-                .command(parameters)
-                .start();
+            ProcessBuilder processBuilder = new ProcessBuilder();
+
+            if (jpackageEnvironment != null && !jpackageEnvironment.isEmpty()) {
+                getLogger().info(EXECUTABLE + " environment:");
+
+                Map<String, String> environment = processBuilder.environment();
+                for (Map.Entry<String, String> entry : jpackageEnvironment.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+
+                    if (key == null || key.trim().isEmpty() || value == null) {
+                        // Silently skip null or empty keys or null values
+                        continue;
+                    }
+
+                    environment.put(key, value);
+                    getLogger().info("  " + key + " = " + value);
+                }
+            }
+
+            Process process = processBuilder
+                    .redirectErrorStream(true)
+                    .command(parameters)
+                    .start();
 
             getLogger().info(EXECUTABLE + " output:");
 
