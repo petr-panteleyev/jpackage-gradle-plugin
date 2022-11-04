@@ -47,58 +47,72 @@ windows {
 ### Parameters
 
 <table>
-<tr><th>Parameter</th><th>Type</th><th>JPackage Argument</th></tr>
-<tr><th colspan="3">Generic</th></tr>
-<tr><td>type</td><td>ImageType</td><td>--type &lt;type></td></tr>
-<tr><td>appName</td><td>String</td><td>--name &lt;name></td></tr>
-<tr><td>appVersion</td><td>String</td><td>--app-version &lt;version></td></tr>
-<tr><td>copyright</td><td>String</td><td>--copyright &lt;copyright string></td></tr>
-<tr><td>appDescription</td><td>String</td><td>--description &lt;description string></td></tr>
-<tr><td>vendor</td><td>String</td><td>--vendor &lt;vendor string></td></tr>
-<tr><td>installDir</td><td>String</td><td>--install-dir &lt;file path></td></tr>
-<tr><td>module</td><td>String</td><td>--module &lt;module name>[/&lt;main class>]</td></tr>
-<tr><td>mainClass</td><td>String</td><td>--main-class &lt;class name></td></tr>
-<tr><td>mainJar</td><td>String</td><td>--main-jar &lt;main jar file></td></tr>
-<tr><td>verbose</td><td>Boolean</td><td>--verbose</td></tr>
-<tr><td>arguments</td><td>String</td><td>--arguments &lt;main class arguments></td></tr>
-<tr><td>addModules</td><td>String</td><td>--add-modules &lt;module>[,&lt;module>]</td></tr>
-<tr><td>appImage</td><td>String <sup>(*)</sup></td><td>--app-image &lt;name></td></tr>
-<tr><td>destination</td><td>String <sup>(*)</sup></td><td>--dest &lt;destination path></td></tr>
-<tr><td>fileAssociations</td><td>String <sup>(*)</sup></td><td>--file-associations &lt;file association property file></td></tr>
-<tr><td>icon</td><td>String <sup>(*)</sup></td><td>--icon &lt;icon file path></td></tr>
-<tr><td>input</td><td>String <sup>(*)</sup></td><td>--input &lt;input path></td></tr>
-<tr><td>licenseFile</td><td>String <sup>(*)</sup></td><td>--license-file &lt;license file path></td></tr>
-<tr><td>modulePaths</td><td>String <sup>(*)</sup></td><td>--module-path &lt;module path></td></tr>
-<tr><td>resourceDir</td><td>String <sup>(*)</sup></td><td>--resource-dir &lt;resource dir path></td></tr>
-<tr><td>runtimeImage</td><td>String <sup>(*)</sup></td><td>--runtime-image &lt;file path></td></tr>
-<tr><td>temp</td><td>String <sup>(*)</sup></td><td>--temp &lt;temp dir path></td></tr>
-<tr><td>launchers</td><td>Launcher <sup>(*)</sup></td><td>--add-launcher &lt;name>=&lt;property file></td></tr>
+<tr><th>Parameter</th><th>Type</th><th>JPackage Argument</th><th>Min Version</th><th>Max Version</th></tr>
+<tr><th colspan="5">Generic</th></tr>
+<tr><td>aboutUrl</td><td>String</td><td>--about-url &lt;url></td><td>17</td><td>*</td></tr>
+<tr><td>addModules</td><td>List&lt;String></td><td>--add-modules &lt;module>[,&lt;module>]</td><td>14</td><td>*</td></tr>
+<tr><td>appDescription</td><td>String</td><td>--description &lt;description string></td><td>14</td><td>*</td></tr>
+<tr><td>appContent</td><td>List&lt;String> <sup>(*)</sup></td><td>--app-content additional-content[,additional-content...]</td><td>18</td><td>*</td></tr>
+<tr><td>appImage</td><td>String <sup>(*)</sup></td><td>--app-image &lt;name></td><td>14</td><td>*</td></tr>
+<tr><td>appName</td><td>String</td><td>--name &lt;name></td><td>14</td><td>*</td></tr>
+<tr><td>appVersion</td><td>String</td><td>--app-version &lt;version></td><td>14</td><td>*</td></tr>
+<tr><td>arguments</td><td>List&lt;String></td><td>--arguments &lt;main class arguments></td><td>14</td><td>*</td></tr>
+<tr><td>bindServices</td><td>Boolean</td><td>--bind-services</td><td>14</td><td>15</td></tr>
+<tr><td>copyright</td><td>String</td><td>--copyright &lt;copyright string></td><td>14</td><td>*</td></tr>
+<tr><td>destination</td><td>String <sup>(*)</sup></td><td>--dest &lt;destination path></td><td>14</td><td>*</td></tr>
+<tr><td>fileAssociations</td><td>List&lt;String> <sup>(*)</sup></td><td>--file-associations &lt;file association property file></td><td>14</td><td>*</td></tr>
+<tr><td>icon</td><td>String <sup>(*)</sup></td><td>--icon &lt;icon file path></td><td>14</td><td>*</td></tr>
+<tr><td>input</td><td>String <sup>(*)</sup></td><td>--input &lt;input path></td><td>14</td><td>*</td></tr>
+<tr><td>installDir</td><td>String</td><td>--install-dir &lt;file path></td><td>14</td><td>*</td></tr>
+<tr><td>jLinkOptions</td><td>List&lt;String></td><td>--jlink-options &lt;options></td><td>16</td><td>*</td></tr>
+<tr><td>launchers</td><td>List&lt;Launcher> <sup>(*)</sup></td><td>--add-launcher &lt;name>=&lt;property file></td><td>14</td><td>*</td></tr>
+<tr><td>launcherAsService</td><td>Boolean</td><td>--launcher-as-service</td><td>19</td><td>*</td></tr>
+<tr><td>licenseFile</td><td>String <sup>(*)</sup></td><td>--license-file &lt;license file path></td><td>14</td><td>*</td></tr>
+<tr><td>mainClass</td><td>String</td><td>--main-class &lt;class name></td><td>14</td><td>*</td></tr>
+<tr><td>mainJar</td><td>String</td><td>--main-jar &lt;main jar file></td><td>14</td><td>*</td></tr>
+<tr><td>module</td><td>String</td><td>--module &lt;module name>[/&lt;main class>]</td><td>14</td><td>*</td></tr>
+<tr><td>modulePaths</td><td>List&lt;String> <sup>(*)</sup></td><td>--module-path &lt;module path></td><td>14</td><td>*</td></tr>
+<tr><td>resourceDir</td><td>String <sup>(*)</sup></td><td>--resource-dir &lt;resource dir path></td><td>14</td><td>*</td></tr>
+<tr><td>runtimeImage</td><td>String <sup>(*)</sup></td><td>--runtime-image &lt;file path></td><td>14</td><td>*</td></tr>
+<tr><td>temp</td><td>String <sup>(*)</sup></td><td>--temp &lt;temp dir path></td><td>14</td><td>*</td></tr>
+<tr><td>type</td><td>ImageType</td><td>--type &lt;type></td><td>14</td><td>*</td></tr>
+<tr><td>vendor</td><td>String</td><td>--vendor &lt;vendor string></td><td>14</td><td>*</td></tr>
+<tr><td>verbose</td><td>Boolean</td><td>--verbose</td><td>14</td><td>*</td></tr>
 
-<tr><th colspan="3">Windows</th></tr>
-<tr><td>winMenu</td><td>Boolean</td><td>--win-menu</td></tr>
-<tr><td>winDirChooser</td><td>Boolean</td><td>--win-dir-chooser</td></tr>
-<tr><td>winUpgradeUuid</td><td>String</td><td>--win-upgrade-uuid &lt;id string></td></tr>
-<tr><td>winMenuGroup</td><td>String</td><td>--win-menu-group &lt;menu group name></td></tr>
-<tr><td>winShortcut</td><td>Boolean</td><td>--win-shortcut</td></tr>
-<tr><td>winPerUserInstall</td><td>Boolean</td><td>--win-per-user-install</td></tr>
-<tr><td>winConsole</td><td>Boolean</td><td>--win-console</td></tr>
+<tr><th colspan="5">Windows</th></tr>
+<tr><td>winConsole</td><td>Boolean</td><td>--win-console</td><td>14</td><td>*</td></tr>
+<tr><td>winDirChooser</td><td>Boolean</td><td>--win-dir-chooser</td><td>14</td><td>*</td></tr>
+<tr><td>winHelpUrl</td><td>String</td><td>--win-help-url &lt;url></td><td>17</td><td>*</td></tr>
+<tr><td>winMenu</td><td>Boolean</td><td>--win-menu</td><td>14</td><td>*</td></tr>
+<tr><td>winMenuGroup</td><td>String</td><td>--win-menu-group &lt;menu group name></td><td>14</td><td>*</td></tr>
+<tr><td>winPerUserInstall</td><td>Boolean</td><td>--win-per-user-install</td><td>14</td><td>*</td></tr>
+<tr><td>winShortcut</td><td>Boolean</td><td>--win-shortcut</td><td>14</td><td>*</td></tr>
+<tr><td>winShortcutPrompt</td><td>Boolean</td><td>--win-shortcut-prompt</td><td>17</td><td>*</td></tr>
+<tr><td>winUpdateUrl</td><td>String</td><td>--win-update-url &lt;url></td><td>17</td><td>*</td></tr>
+<tr><td>winUpgradeUuid</td><td>String</td><td>--win-upgrade-uuid &lt;id string></td><td>14</td><td>*</td></tr>
 
-<tr><th colspan="3">OS X</th></tr>
-<tr><td>macPackageIdentifier</td><td>String</td><td>--mac-package-identifier &lt;ID string></td></tr>
-<tr><td>macPackageName</td><td>String</td><td>--mac-package-name &lt;name string></td></tr>
-<tr><td>macPackageSigningPrefix</td><td>String</td><td>--mac-package-signing-prefix &lt;prefix string></td></tr>
-<tr><td>macSign</td><td>Boolean</td><td>--mac-sign</td></tr>
-<tr><td>macSigningKeychain</td><td>String <sup>(*)</sup></td><td>--mac-signing-keychain &lt;file path></td></tr>
-<tr><td>macSigningKeyUserName</td><td>String</td><td>--mac-signing-key-user-name &lt;team name></td></tr>
+<tr><th colspan="5">OS X</th></tr>
+<tr><td>macAppCategory</td><td>String</td><td>-mac-app-category &lt;category string></td><td>17</td><td>*</td></tr>
+<tr><td>macAppStore</td><td>Boolean</td><td>--mac-app-store</td><td>17</td><td>*</td></tr>
+<tr><td>macBundleSigningPrefix</td><td>String</td><td>--mac-bundle-signing-prefix &lt;prefix string></td><td>14</td><td>16</td></tr>
+<tr><td>macDmgContent</td><td>List&lt;String> <sup>(*)</sup></td><td>--mac-dmg-content additional-content[,additional-content...]</td><td>18</td><td>*</td></tr>
+<tr><td>macEntitlements</td><td>String <sup>(*)</sup></td><td>--mac-entitlements &lt;file path></td><td>17</td><td>*</td></tr>
+<tr><td>macPackageIdentifier</td><td>String</td><td>--mac-package-identifier &lt;ID string></td><td>14</td><td>*</td></tr>
+<tr><td>macPackageName</td><td>String</td><td>--mac-package-name &lt;name string></td><td>14</td><td>*</td></tr>
+<tr><td>macPackageSigningPrefix</td><td>String</td><td>--mac-package-signing-prefix &lt;prefix string></td><td>17</td><td>*</td></tr>
+<tr><td>macSign</td><td>Boolean</td><td>--mac-sign</td><td>14</td><td>*</td></tr>
+<tr><td>macSigningKeychain</td><td>String <sup>(*)</sup></td><td>--mac-signing-keychain &lt;file path></td><td>14</td><td>*</td></tr>
+<tr><td>macSigningKeyUserName</td><td>String</td><td>--mac-signing-key-user-name &lt;team name></td><td>14</td><td>*</td></tr>
 
-<tr><th colspan="3">Linux</th></tr>
-<tr><td>linuxPackageName</td><td>String</td><td>--linux-package-name &lt;package name></td></tr>
-<tr><td>linuxDebMaintainer</td><td>String</td><td>--linux-deb-maintainer &lt;email address></td></tr>
-<tr><td>linuxMenuGroup</td><td>String</td><td>--linux-menu-group &lt;menu-group-name></td></tr>
-<tr><td>linuxRpmLicenseType</td><td>String</td><td>--linux-rpm-license-type &lt;type string></td></tr>
-<tr><td>linuxAppRelease</td><td>String</td><td>--linux-app-release &lt;release value></td></tr>
-<tr><td>linuxAppCategory</td><td>String</td><td>--linux-app-category &lt;category value></td></tr>
-<tr><td>linuxShortcut</td><td>Boolean</td><td>--linux-shortcut</td></tr>
+<tr><th colspan="5">Linux</th></tr>
+<tr><td>linuxAppCategory</td><td>String</td><td>--linux-app-category &lt;category value></td><td>14</td><td>*</td></tr>
+<tr><td>linuxAppRelease</td><td>String</td><td>--linux-app-release &lt;release value></td><td>14</td><td>*</td></tr>
+<tr><td>linuxDebMaintainer</td><td>String</td><td>--linux-deb-maintainer &lt;email address></td><td>14</td><td>*</td></tr>
+<tr><td>linuxMenuGroup</td><td>String</td><td>--linux-menu-group &lt;menu-group-name></td><td>14</td><td>*</td></tr>
+<tr><td>linuxPackageName</td><td>String</td><td>--linux-package-name &lt;package name></td><td>14</td><td>*</td></tr>
+<tr><td>linuxPackageDeps</td><td>Boolean</td><td>--linux-package-deps</td><td>14</td><td>*</td></tr>
+<tr><td>linuxRpmLicenseType</td><td>String</td><td>--linux-rpm-license-type &lt;type string></td><td>14</td><td>*</td></tr>
+<tr><td>linuxShortcut</td><td>Boolean</td><td>--linux-shortcut</td><td>14</td><td>*</td></tr>
 
 </table>
 
@@ -133,17 +147,16 @@ argumens = listOf(
 )
 ```
 
-### Additional Parameters
+### jlink options
 
-Additional parameters allow passing ```jpackage``` command line options not supported by the plugin. These parameters
-are passed as is without any transformation.
+Options that are passed to underlying jlink call.
 
 _Example:_
 
 ```kotlin
-additionalParameters = listOf(
-    "--jlink-options",
-    "--bind-services"
+jLinkOptions = listOf(
+    "--strip-native-commands",
+    "--strip-debug"
 )
 ```
 
@@ -185,4 +198,4 @@ $ ./gradlew clean build jpackage --info -Djpackage.dryRun=true
 
 ## References
 
-[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/16/jpackage/packaging-tool-user-guide.pdf)
+[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/19/jpackage/packaging-tool-user-guide.pdf)

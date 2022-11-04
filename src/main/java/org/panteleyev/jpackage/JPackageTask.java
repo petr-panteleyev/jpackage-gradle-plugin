@@ -19,11 +19,69 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.panteleyev.jpackage.CommandLineParameter.ABOUT_URL;
+import static org.panteleyev.jpackage.CommandLineParameter.ADD_LAUNCHER;
+import static org.panteleyev.jpackage.CommandLineParameter.ADD_MODULES;
+import static org.panteleyev.jpackage.CommandLineParameter.APP_CONTENT;
+import static org.panteleyev.jpackage.CommandLineParameter.APP_IMAGE;
+import static org.panteleyev.jpackage.CommandLineParameter.APP_VERSION;
+import static org.panteleyev.jpackage.CommandLineParameter.ARGUMENTS;
+import static org.panteleyev.jpackage.CommandLineParameter.BIND_SERVICES;
+import static org.panteleyev.jpackage.CommandLineParameter.COPYRIGHT;
+import static org.panteleyev.jpackage.CommandLineParameter.DESCRIPTION;
+import static org.panteleyev.jpackage.CommandLineParameter.DESTINATION;
+import static org.panteleyev.jpackage.CommandLineParameter.FILE_ASSOCIATIONS;
+import static org.panteleyev.jpackage.CommandLineParameter.ICON;
+import static org.panteleyev.jpackage.CommandLineParameter.INPUT;
+import static org.panteleyev.jpackage.CommandLineParameter.INSTALL_DIR;
+import static org.panteleyev.jpackage.CommandLineParameter.JAVA_OPTIONS;
+import static org.panteleyev.jpackage.CommandLineParameter.JLINK_OPTIONS;
+import static org.panteleyev.jpackage.CommandLineParameter.LAUNCHER_AS_SERVICE;
+import static org.panteleyev.jpackage.CommandLineParameter.LICENSE_FILE;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_APP_CATEGORY;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_APP_RELEASE;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_DEB_MAINTAINER;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_MENU_GROUP;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_PACKAGE_DEPS;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_PACKAGE_NAME;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_RPM_LICENSE_TYPE;
+import static org.panteleyev.jpackage.CommandLineParameter.LINUX_SHORTCUT;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_APP_CATEGORY;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_APP_STORE;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_BUNDLE_SIGNING_PREFIX;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_DMG_CONTENT;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_ENTITLEMENTS;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_PACKAGE_IDENTIFIER;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_PACKAGE_NAME;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_PACKAGE_SIGNING_PREFIX;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_SIGN;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_SIGNING_KEYCHAIN;
+import static org.panteleyev.jpackage.CommandLineParameter.MAC_SIGNING_KEY_USER_NAME;
+import static org.panteleyev.jpackage.CommandLineParameter.MAIN_CLASS;
+import static org.panteleyev.jpackage.CommandLineParameter.MAIN_JAR;
+import static org.panteleyev.jpackage.CommandLineParameter.MODULE;
+import static org.panteleyev.jpackage.CommandLineParameter.MODULE_PATH;
+import static org.panteleyev.jpackage.CommandLineParameter.NAME;
+import static org.panteleyev.jpackage.CommandLineParameter.RESOURCE_DIR;
+import static org.panteleyev.jpackage.CommandLineParameter.RUNTIME_IMAGE;
+import static org.panteleyev.jpackage.CommandLineParameter.TEMP;
+import static org.panteleyev.jpackage.CommandLineParameter.TYPE;
+import static org.panteleyev.jpackage.CommandLineParameter.VENDOR;
+import static org.panteleyev.jpackage.CommandLineParameter.VERBOSE;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_CONSOLE;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_DIR_CHOOSER;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_HELP_URL;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_MENU;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_MENU_GROUP;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_PER_USER_INSTALL;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT_PROMPT;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPDATE_URL;
+import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPGRADE_UUID;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
 import static org.panteleyev.jpackage.OsUtil.isWindows;
@@ -31,7 +89,7 @@ import static org.panteleyev.jpackage.StringUtil.escape;
 
 @SuppressWarnings({"SameParameterValue", "unused"})
 public class JPackageTask extends DefaultTask {
-    private static final String EXECUTABLE = "jpackage";
+    static final String EXECUTABLE = "jpackage";
 
     private boolean verbose;
     private ImageType type = ImageType.DEFAULT;
@@ -58,6 +116,11 @@ public class JPackageTask extends DefaultTask {
     private List<String> fileAssociations;
     private List<Launcher> launchers;
     private List<String> addModules;
+    private boolean bindServices;
+    private List<String> jLinkOptions;
+    private String aboutUrl;
+    private boolean launcherAsService;
+    private List<String> appContent;
 
     // Windows specific parameters
     private boolean winMenu;
@@ -67,14 +130,22 @@ public class JPackageTask extends DefaultTask {
     private boolean winShortcut;
     private boolean winPerUserInstall;
     private boolean winConsole;
+    private String winHelpUrl;
+    private boolean winShortcutPrompt;
+    private String winUpdateUrl;
 
     // OS X specific parameters
     private String macPackageIdentifier;
     private String macPackageName;
     private String macPackageSigningPrefix;
+    private String macBundleSigningPrefix;
     private boolean macSign;
     private String macSigningKeychain;
     private String macSigningKeyUserName;
+    private boolean macAppStore;
+    private String macAppCategory;
+    private String macEntitlements;
+    private List<String> macDmgContent;
 
     // Linux specific parameters
     private String linuxPackageName;
@@ -84,6 +155,7 @@ public class JPackageTask extends DefaultTask {
     private String linuxAppRelease;
     private String linuxAppCategory;
     private boolean linuxShortcut;
+    private boolean linuxPackageDeps;
 
     // Additional parameters
     private List<String> additionalParameters = new ArrayList<>();
@@ -346,6 +418,54 @@ public class JPackageTask extends DefaultTask {
     }
 
     @Input
+    public boolean getBindServices() {
+        return bindServices;
+    }
+
+    public void setBindServices(boolean bindServices) {
+        this.bindServices = bindServices;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public List<String> getJLinkOptions() {
+        return jLinkOptions;
+    }
+
+    public void setJLinkOptions(List<String> jLinkOptions) {
+        this.jLinkOptions = jLinkOptions;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public String getAboutUrl() {
+        return aboutUrl;
+    }
+
+    public void setAboutUrl(String aboutUrl) {
+        this.aboutUrl = aboutUrl;
+    }
+
+    @Input
+    public boolean getLauncherAsService() {
+        return launcherAsService;
+    }
+
+    public void setLauncherAsService(boolean launcherAsService) {
+        this.launcherAsService = launcherAsService;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public List<String> getAppContent() {
+        return appContent;
+    }
+
+    public void setAppContent(List<String> appContent) {
+        this.appContent = appContent;
+    }
+
+    @Input
     public boolean getWinMenu() {
         return winMenu;
     }
@@ -412,6 +532,35 @@ public class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
+    public String getWinHelpUrl() {
+        return winHelpUrl;
+    }
+
+    public void setWinHelpUrl(String winHelpUrl) {
+        this.winHelpUrl = winHelpUrl;
+    }
+
+    @Input
+    public boolean getWinShortcutPrompt() {
+        return winShortcutPrompt;
+    }
+
+    public void setWinShortcutPrompt(boolean winShortcutPrompt) {
+        this.winShortcutPrompt = winShortcutPrompt;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public String getWinUpdateUrl() {
+        return winUpdateUrl;
+    }
+
+    public void setWinUpdateUrl(String winUpdateUrl) {
+        this.winUpdateUrl = winUpdateUrl;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
     public String getMacPackageIdentifier() {
         return macPackageIdentifier;
     }
@@ -441,6 +590,16 @@ public class JPackageTask extends DefaultTask {
     }
 
     @Input
+    @org.gradle.api.tasks.Optional
+    public String getMacBundleSigningPrefix() {
+        return macBundleSigningPrefix;
+    }
+
+    public void setMacBundleSigningPrefix(String macBundleSigningPrefix) {
+        this.macBundleSigningPrefix = macBundleSigningPrefix;
+    }
+
+    @Input
     public boolean getMacSign() {
         return macSign;
     }
@@ -467,6 +626,45 @@ public class JPackageTask extends DefaultTask {
 
     public void setMacSigningKeyUserName(String macSigningKeyUserName) {
         this.macSigningKeyUserName = macSigningKeyUserName;
+    }
+
+    @Input
+    public boolean getMacAppStore() {
+        return macAppStore;
+    }
+
+    public void setMacAppStore(boolean macAppStore) {
+        this.macAppStore = macAppStore;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public String getMacAppCategory() {
+        return macAppCategory;
+    }
+
+    public void setMacAppCategory(String macAppCategory) {
+        this.macAppCategory = macAppCategory;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public String getMacEntitlements() {
+        return macEntitlements;
+    }
+
+    public void setMacEntitlements(String macEntitlements) {
+        this.macEntitlements = macEntitlements;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public List<String> getMacDmgContent() {
+        return macDmgContent;
+    }
+
+    public void setMacDmgContent(List<String> macDmgContent) {
+        this.macDmgContent = macDmgContent;
     }
 
     @Input
@@ -539,6 +737,15 @@ public class JPackageTask extends DefaultTask {
     }
 
     @Input
+    public boolean getLinuxPackageDeps() {
+        return linuxPackageDeps;
+    }
+
+    public void setLinuxPackageDeps(boolean linuxPackageDeps) {
+        this.linuxPackageDeps = linuxPackageDeps;
+    }
+
+    @Input
     public List<String> getAdditionalParameters() {
         return additionalParameters;
     }
@@ -567,7 +774,6 @@ public class JPackageTask extends DefaultTask {
                 .orElseGet(() -> getJPackageFromJavaHome()
                         .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
 
-        getLogger().info("Using: " + jpackage);
         execute(jpackage);
     }
 
@@ -581,6 +787,7 @@ public class JPackageTask extends DefaultTask {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private Optional<String> getJPackageFromToolchain() {
         getLogger().info("Looking for {} in toolchain", EXECUTABLE);
         try {
@@ -607,90 +814,109 @@ public class JPackageTask extends DefaultTask {
         return buildExecutablePath(javaHome);
     }
 
-    private void buildParameters(Collection<String> parameters) {
-        if (type != ImageType.DEFAULT) {
-            addParameter(parameters, "--type", type);
-        }
-
-        addParameter(parameters, "--verbose", verbose);
-        addParameter(parameters, "--name", appName);
-        addParameter(parameters, "--app-version", appVersion);
-        addParameter(parameters, "--copyright", copyright);
-        addParameter(parameters, "--description", appDescription);
-        addParameter(parameters, "--install-dir", installDir);
-        addParameter(parameters, "--vendor", vendor);
-        addParameter(parameters, "--module", module);
-        addParameter(parameters, "--main-class", mainClass);
-        addParameter(parameters, "--main-jar", mainJar);
-        if (addModules != null && !addModules.isEmpty()) {
-            addParameter(parameters, "--add-modules",
-                    String.join(",", addModules)
-            );
-        }
-        if (arguments != null) {
-            for (Object arg : arguments) {
-                addParameter(parameters, "--arguments", escape(arg.toString()));
-            }
-        }
-        if (javaOptions != null) {
-            for (Object option : javaOptions) {
-                addParameter(parameters, "--java-options", escape(option.toString()));
-            }
-        }
-
-        // File parameters
-        addFileParameter(parameters, "--app-image", appImage);
-        addFileParameter(parameters, "--dest", destination, false);
-        if (fileAssociations != null) {
-            for (Object association : fileAssociations) {
-                addFileParameter(parameters, "--file-associations", association.toString());
-            }
-        }
-        addFileParameter(parameters, "--icon", icon);
-        addFileParameter(parameters, "--input", input);
-        addFileParameter(parameters, "--license-file", licenseFile);
-        if (modulePaths != null) {
-            for (Object path : modulePaths) {
-                addFileParameter(parameters, "--module-path", path.toString());
-            }
-        }
-        addFileParameter(parameters, "--resource-dir", resourceDir);
-        addFileParameter(parameters, "--runtime-image", runtimeImage);
-        addFileParameter(parameters, "--temp", temp);
+    private void buildParameters(Collection<String> parameters, int version) {
+        addParameter(parameters, ABOUT_URL, aboutUrl, version);
         if (launchers != null) {
             for (Launcher launcher : launchers) {
                 File launcherFile = getProject().file(launcher.getFilePath());
                 if (!launcherFile.exists()) {
                     throw new GradleException("Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
                 }
-                addParameter(parameters, "--add-launcher",
-                        launcher.getName() + "=" + launcherFile.getAbsolutePath());
+                addParameter(parameters, ADD_LAUNCHER,
+                        launcher.getName() + "=" + launcherFile.getAbsolutePath(), version);
             }
         }
+        if (addModules != null && !addModules.isEmpty()) {
+            addParameter(parameters, ADD_MODULES, String.join(",", addModules), version);
+        }
+        if (appContent != null) {
+            for (Object appContentElement : appContent) {
+                addFileParameter(parameters, APP_CONTENT, appContentElement.toString(), true, version);
+            }
+        }
+        addFileParameter(parameters, APP_IMAGE, appImage, version);
+        addParameter(parameters, APP_VERSION, appVersion, version);
+        if (arguments != null) {
+            for (Object arg : arguments) {
+                addParameter(parameters, ARGUMENTS, escape(arg.toString()), version);
+            }
+        }
+        addParameter(parameters, BIND_SERVICES, bindServices, version);
+        addParameter(parameters, COPYRIGHT, copyright, version);
+        addParameter(parameters, DESCRIPTION, appDescription, version);
+        addFileParameter(parameters, DESTINATION, destination, false, version);
+        if (fileAssociations != null) {
+            for (Object association : fileAssociations) {
+                addFileParameter(parameters, FILE_ASSOCIATIONS, association.toString(), true, version);
+            }
+        }
+        addFileParameter(parameters, ICON, icon, true, version);
+        addFileParameter(parameters, INPUT, input, true, version);
+        addParameter(parameters, INSTALL_DIR, installDir, version);
+        if (javaOptions != null) {
+            for (Object option : javaOptions) {
+                addParameter(parameters, JAVA_OPTIONS, escape(option.toString()), version);
+            }
+        }
+        if (jLinkOptions != null && !jLinkOptions.isEmpty()) {
+            addParameter(parameters, JLINK_OPTIONS, String.join(" ", jLinkOptions), version);
+        }
+        addParameter(parameters, LAUNCHER_AS_SERVICE, launcherAsService, version);
+        addFileParameter(parameters, LICENSE_FILE, licenseFile, true, version);
+        addParameter(parameters, MAIN_CLASS, mainClass, version);
+        addParameter(parameters, MAIN_JAR, mainJar, version);
+        addParameter(parameters, MODULE, module, version);
+        if (modulePaths != null) {
+            for (Object path : modulePaths) {
+                addFileParameter(parameters, MODULE_PATH, path.toString(), version);
+            }
+        }
+        addParameter(parameters, NAME, appName, version);
+        addFileParameter(parameters, RESOURCE_DIR, resourceDir, true, version);
+        addFileParameter(parameters, RUNTIME_IMAGE, runtimeImage, true, version);
+        addFileParameter(parameters, TEMP, temp, false, version);
+        if (type != ImageType.DEFAULT) {
+            addParameter(parameters, TYPE, type, version);
+        }
+        addParameter(parameters, VENDOR, vendor, version);
+        addParameter(parameters, VERBOSE, verbose, version);
 
         if (isMac()) {
-            addParameter(parameters, "--mac-package-identifier", macPackageIdentifier);
-            addParameter(parameters, "--mac-package-name", macPackageName);
-            addParameter(parameters, "--mac-package-signing-prefix", macPackageSigningPrefix);
-            addParameter(parameters, "--mac-sign", macSign);
-            addParameter(parameters, "--mac-signing-key-user-name", macSigningKeyUserName);
-            addFileParameter(parameters, "--mac-signing-keychain", macSigningKeychain);
+            addParameter(parameters, MAC_APP_CATEGORY, macAppCategory, version);
+            addParameter(parameters, MAC_APP_STORE, macAppStore, version);
+            addParameter(parameters, MAC_BUNDLE_SIGNING_PREFIX, macBundleSigningPrefix, version);
+            if (macDmgContent != null) {
+                for (Object dmgContent : macDmgContent) {
+                    addFileParameter(parameters, MAC_DMG_CONTENT, dmgContent.toString(), true, version);
+                }
+            }
+            addFileParameter(parameters, MAC_ENTITLEMENTS, macEntitlements, true, version);
+            addParameter(parameters, MAC_PACKAGE_IDENTIFIER, macPackageIdentifier, version);
+            addParameter(parameters, MAC_PACKAGE_NAME, macPackageName, version);
+            addParameter(parameters, MAC_PACKAGE_SIGNING_PREFIX, macPackageSigningPrefix, version);
+            addParameter(parameters, MAC_SIGN, macSign, version);
+            addParameter(parameters, MAC_SIGNING_KEY_USER_NAME, macSigningKeyUserName, version);
+            addFileParameter(parameters, MAC_SIGNING_KEYCHAIN, macSigningKeychain, true, version);
         } else if (isWindows()) {
-            addParameter(parameters, "--win-menu", winMenu);
-            addParameter(parameters, "--win-dir-chooser", winDirChooser);
-            addParameter(parameters, "--win-upgrade-uuid", winUpgradeUuid);
-            addParameter(parameters, "--win-menu-group", winMenuGroup);
-            addParameter(parameters, "--win-shortcut", winShortcut);
-            addParameter(parameters, "--win-per-user-install", winPerUserInstall);
-            addParameter(parameters, "--win-console", winConsole);
+            addParameter(parameters, WIN_CONSOLE, winConsole, version);
+            addParameter(parameters, WIN_DIR_CHOOSER, winDirChooser, version);
+            addParameter(parameters, WIN_HELP_URL, winHelpUrl, version);
+            addParameter(parameters, WIN_MENU, winMenu, version);
+            addParameter(parameters, WIN_MENU_GROUP, winMenuGroup, version);
+            addParameter(parameters, WIN_PER_USER_INSTALL, winPerUserInstall, version);
+            addParameter(parameters, WIN_SHORTCUT, winShortcut, version);
+            addParameter(parameters, WIN_SHORTCUT_PROMPT, winShortcutPrompt, version);
+            addParameter(parameters, WIN_UPDATE_URL, winUpdateUrl, version);
+            addParameter(parameters, WIN_UPGRADE_UUID, winUpgradeUuid, version);
         } else if (isLinux()) {
-            addParameter(parameters, "--linux-package-name", linuxPackageName);
-            addParameter(parameters, "--linux-deb-maintainer", linuxDebMaintainer);
-            addParameter(parameters, "--linux-menu-group", linuxMenuGroup);
-            addParameter(parameters, "--linux-rpm-license-type", linuxRpmLicenseType);
-            addParameter(parameters, "--linux-app-release", linuxAppRelease);
-            addParameter(parameters, "--linux-app-category", linuxAppCategory);
-            addParameter(parameters, "--linux-shortcut", linuxShortcut);
+            addParameter(parameters, LINUX_APP_CATEGORY, linuxAppCategory, version);
+            addParameter(parameters, LINUX_APP_RELEASE, linuxAppRelease, version);
+            addParameter(parameters, LINUX_DEB_MAINTAINER, linuxDebMaintainer, version);
+            addParameter(parameters, LINUX_MENU_GROUP, linuxMenuGroup, version);
+            addParameter(parameters, LINUX_PACKAGE_DEPS, linuxPackageDeps, version);
+            addParameter(parameters, LINUX_PACKAGE_NAME, linuxPackageName, version);
+            addParameter(parameters, LINUX_RPM_LICENSE_TYPE, linuxRpmLicenseType, version);
+            addParameter(parameters, LINUX_SHORTCUT, linuxShortcut, version);
         }
 
         // Additional options
@@ -700,9 +926,16 @@ public class JPackageTask extends DefaultTask {
     }
 
     private void execute(String cmd) {
+        int version = getMajorVersion(cmd);
+        if (version == 0) {
+            throw new GradleException("Could not determine " + EXECUTABLE + " version");
+        } else {
+            getLogger().info("Using: {}, major version: {}", cmd, version);
+        }
+
         List<String> parameters = new ArrayList<>();
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
-        buildParameters(parameters);
+        buildParameters(parameters, version);
 
         if (dryRun) {
             return;
@@ -752,6 +985,40 @@ public class JPackageTask extends DefaultTask {
         }
     }
 
+
+    private int getMajorVersion(String cmd) {
+        List<String> parameters = new ArrayList<>();
+        parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
+        parameters.add("--version");
+
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            Process process = processBuilder
+                    .redirectErrorStream(true)
+                    .command(parameters)
+                    .start();
+
+            int result = 0;
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line = reader.readLine();
+                if (line != null) {
+                    String[] parts = line.split("\\.");
+                    result = Integer.parseInt(parts[0]);
+                }
+            }
+
+            int status = process.waitFor();
+            if (status != 0) {
+                return 0;
+            } else {
+                return result;
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     /**
      * Executes windows specific configuration block.
      *
@@ -795,21 +1062,35 @@ public class JPackageTask extends DefaultTask {
         params.add(value);
     }
 
-    private void addFileParameter(Collection<String> params, String name, String value) {
-        addFileParameter(params, name, value, true);
-    }
-
-    private void addFileParameter(Collection<String> params, String name, String value, boolean mustExist) {
+    private void addParameter(Collection<String> params, CommandLineParameter parameter, String value, int version) {
         if (value == null || value.isEmpty()) {
             return;
         }
+
+        parameter.checkVersion(version);
+
+        getLogger().info("  " + parameter.getName() + " " + value);
+        params.add(parameter.getName());
+        params.add(value);
+    }
+
+    private void addFileParameter(Collection<String> params, CommandLineParameter parameter, String value, int version) {
+        addFileParameter(params, parameter, value, true, version);
+    }
+
+    private void addFileParameter(Collection<String> params, CommandLineParameter parameter, String value, boolean mustExist, int version) {
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+
+        parameter.checkVersion(version);
 
         File file = getProject().file(value);
         if (mustExist && !file.exists()) {
             throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
         }
 
-        addParameter(params, name, file.getAbsolutePath());
+        addParameter(params, parameter.getName(), file.getAbsolutePath());
     }
 
     private void addParameter(Collection<String> params, String name, boolean value) {
@@ -821,12 +1102,25 @@ public class JPackageTask extends DefaultTask {
         params.add(name);
     }
 
-    private void addParameter(Collection<String> params, String name, EnumParameter value) {
+    private void addParameter(Collection<String> params, CommandLineParameter parameter, boolean value, int version) {
+        if (!value) {
+            return;
+        }
+
+        parameter.checkVersion(version);
+
+        getLogger().info("  " + parameter.getName());
+        params.add(parameter.getName());
+    }
+
+    private void addParameter(Collection<String> params, CommandLineParameter parameter, EnumParameter value, int version) {
         if (value == null) {
             return;
         }
 
-        addParameter(params, name, value.getValue());
+        parameter.checkVersion(version);
+
+        addParameter(params, parameter.getName(), value.getValue());
     }
 
     private void addAdditionalParameter(Collection<String> params, String parameter) {

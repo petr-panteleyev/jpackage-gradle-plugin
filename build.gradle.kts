@@ -3,7 +3,7 @@
  SPDX-License-Identifier: BSD-2-Clause
  */
 group = "org.panteleyev"
-version = "1.4.1"
+version = "1.5.0"
 
 plugins {
     java
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.testng:testng:7.3.0")
+    testImplementation("org.testng:testng:7.6.1")
 }
 
 java {
