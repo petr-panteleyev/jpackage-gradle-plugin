@@ -1,30 +1,37 @@
 /*
- * Copyright (c) Petr Panteleyev. All rights reserved.
- * Licensed under the BSD license. See LICENSE file in the project root for full license information.
+ Copyright © 2022 Petr Panteleyev <petr@panteleyev.org>
+ SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
 
 import org.gradle.api.GradleException;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.AssertJUnit.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LauncherTest {
 
-    @DataProvider(name = "constructorExceptions")
-    private Object[][] dataProvider() {
-        return new Object[][]{
-            {"", ""},
-            {null, null},
-            {"", null},
-            {null, ""}
-        };
+    private static List<Arguments> constructorExceptions() {
+        return Arrays.asList(
+                Arguments.of("", ""),
+                Arguments.of(null, null),
+                Arguments.of("", null),
+                Arguments.of(null, "")
+        );
     }
 
-    @Test(dataProvider = "constructorExceptions", expectedExceptions = GradleException.class)
+    @ParameterizedTest
+    @MethodSource("constructorExceptions")
     public void testConstructorException(String name, String filePath) {
-        new Launcher(name, filePath);
+        assertThrows(GradleException.class, () -> {
+            new Launcher(name, filePath);
+        });
     }
 
     @Test
@@ -34,7 +41,7 @@ public class LauncherTest {
         Launcher l3 = new Launcher("345", "123");
 
         assertEquals(l1, l1);
-        assertEquals(l1, l2);
-        assertNotEquals(l2, l3);
+        assertEquals(l2, l1);
+        assertNotEquals(l3, l2);
     }
 }

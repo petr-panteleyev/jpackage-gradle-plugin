@@ -1,13 +1,14 @@
 /*
- Copyright (c) Petr Panteleyev. All rights reserved.
- Licensed under the BSD license. See LICENSE file in the project root for full license information.
+ Copyright © 2022 Petr Panteleyev <petr@panteleyev.org>
+ SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
 
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
-import org.testng.annotations.Test;
-import static org.testng.Assert.assertNotNull;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JPackageGradlePluginTest {
     @Test

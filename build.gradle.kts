@@ -3,7 +3,7 @@
  SPDX-License-Identifier: BSD-2-Clause
  */
 group = "org.panteleyev"
-version = "1.5.0"
+version = "1.5.1-SNAPSHOT"
 
 plugins {
     java
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.testng:testng:7.6.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
 java {
@@ -43,5 +43,5 @@ pluginBundle {
 }
 
 tasks.withType<Test> {
-    useTestNG()
+    useJUnitPlatform()
 }
