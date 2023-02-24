@@ -135,12 +135,11 @@ they contain an absolute path.
 ### Default Command-Line Arguments
 
 Default command line arguments are passed to the main class when the application is started without providing arguments.
-Each argument should be specified using &lt;argument> configuration parameter.
 
 _Example:_
 
 ```kotlin
-argumens = listOf(
+arguments = listOf(
     "SomeArgument",
     "Argument with spaces",
     "Argument with \"quotes\""
