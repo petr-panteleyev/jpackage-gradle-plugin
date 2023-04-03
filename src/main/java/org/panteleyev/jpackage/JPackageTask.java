@@ -1002,6 +1002,12 @@ public class JPackageTask extends DefaultTask {
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line = reader.readLine();
+                String prevLine = line;
+                while(line != null) {
+                    prevLine = line;
+                    line = reader.readLine();
+                }
+                line = prevLine;
                 if (line != null) {
                     String[] parts = line.split("\\.");
                     result = Integer.parseInt(parts[0]);
