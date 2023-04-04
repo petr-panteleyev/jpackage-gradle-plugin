@@ -1,5 +1,5 @@
 /*
- Copyright © 2021-2022 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2021-2023 Petr Panteleyev <petr@panteleyev.org>
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
@@ -82,6 +82,7 @@ import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT_PROMPT;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPDATE_URL;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPGRADE_UUID;
+import static org.panteleyev.jpackage.JDKVersionUtil.getJDKMajorVersion;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
 import static org.panteleyev.jpackage.OsUtil.isWindows;
@@ -926,9 +927,10 @@ public class JPackageTask extends DefaultTask {
     }
 
     private void execute(String cmd) {
-        int version = getMajorVersion(cmd);
+        int version = getJDKMajorVersion(cmd);
         if (version == 0) {
-            throw new GradleException("Could not determine " + EXECUTABLE + " version");
+            getLogger().warn("Could not determine " + EXECUTABLE + " version, parameter check will be skipped");
+            getLogger().info("Using: {}", cmd);
         } else {
             getLogger().info("Using: {}, major version: {}", cmd, version);
         }
@@ -982,40 +984,6 @@ public class JPackageTask extends DefaultTask {
             }
         } catch (Exception ex) {
             throw new GradleException("Error while executing " + EXECUTABLE, ex);
-        }
-    }
-
-
-    private int getMajorVersion(String cmd) {
-        List<String> parameters = new ArrayList<>();
-        parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
-        parameters.add("--version");
-
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            Process process = processBuilder
-                    .redirectErrorStream(true)
-                    .command(parameters)
-                    .start();
-
-            int result = 0;
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line = reader.readLine();
-                if (line != null) {
-                    String[] parts = line.split("\\.");
-                    result = Integer.parseInt(parts[0]);
-                }
-            }
-
-            int status = process.waitFor();
-            if (status != 0) {
-                return 0;
-            } else {
-                return result;
-            }
-        } catch (Exception e) {
-            return 0;
         }
     }
 
