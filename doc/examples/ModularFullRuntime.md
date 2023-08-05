@@ -1,35 +1,40 @@
 # Modular Application with Full Runtime
 
-```kotlin
-task("copyDependencies", Copy::class) {
-    from(configurations.runtimeClasspath).into("$buildDir/jmods")
+```groovy
+tasks.register('copyDependencies', Copy) {
+  from(configurations.runtimeClasspath).into("$buildDir/jmods")
 }
 
-task("copyJar", Copy::class) {
-    from(tasks.jar).into("$buildDir/jmods")
+tasks.register('copyJar', Copy) {
+  from(tasks.jar).into("$buildDir/jmods")
 }
 
 tasks.jpackage {
-    dependsOn("build", "copyDependencies", "copyJar")
+  dependsOn("build", "copyDependencies", "copyJar")
 
-    appName = "Application Name"
-    appVersion = project.version.toString()
-    vendor = "app.org"
-    copyright = "Copyright (c) 2020 Vendor"
-    runtimeImage = System.getProperty("java.home")
-    module = "org.app.module/org.app.MainClass"
-    modulePaths = listOf(File("$buildDir/jmods"))
-    destination = "$buildDir/dist"
-    javaOptions = listOf("-Dfile.encoding=UTF-8")
+  appName = "Application Name"
+  appVersion = project.version.toString()
+  vendor = "app.org"
+  copyright = "Copyright (c) 2020 Vendor"
+  runtimeImage = System.getProperty("java.home")
+  module = 'io.xj.workstation.WorkstationApplication'
+  def buildDirectory = new File("$buildDir/jmods")
+  modulePaths = buildDirectory.listFiles().findAll { it.isFile() }.toList()
+  destination = "$buildDir/dist"
+  javaOptions = ["-Dfile.encoding=UTF-8"]
 
-    mac {
-        icon = "icons/icons.icns"
-    }
+  mac {
+    icon = "icons/icon.icns"
+  }
 
-    windows {
-        icon = "icons/icons.ico"
-        winMenu = true
-        winDirChooser = true
-    }
+  linux {
+    icon = "icons/icon.png"
+  }
+
+  windows {
+    icon = "icons/icon.ico"
+    winMenu = true
+    winDirChooser = true
+  }
 }
 ```
