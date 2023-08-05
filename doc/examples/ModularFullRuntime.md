@@ -17,7 +17,7 @@ tasks.jpackage {
   vendor = "app.org"
   copyright = "Copyright (c) 2020 Vendor"
   runtimeImage = System.getProperty("java.home")
-  module = 'io.xj.workstation.WorkstationApplication'
+  module = 'org.app.modulename'
   def buildDirectory = new File("$buildDir/jmods")
   modulePaths = buildDirectory.listFiles().findAll { it.isFile() }.toList()
   destination = "$buildDir/dist"
