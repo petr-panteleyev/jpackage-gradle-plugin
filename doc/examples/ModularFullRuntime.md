@@ -18,9 +18,9 @@ tasks.jpackage {
     copyright = "Copyright (c) 2020 Vendor"
     runtimeImage = System.getProperty("java.home")
     module = "org.app.module/org.app.MainClass"
-    modulePaths = listOf(File("$buildDir/jmods"))
+    modulePaths = [file("$buildDir/jmods")]
     destination = "$buildDir/dist"
-    javaOptions = listOf("-Dfile.encoding=UTF-8")
+    javaOptions = ["-Dfile.encoding=UTF-8"]
 
     mac {
         icon = "icons/icons.icns"
