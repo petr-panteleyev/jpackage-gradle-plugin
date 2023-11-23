@@ -788,7 +788,6 @@ public class JPackageTask extends DefaultTask {
         }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private Optional<String> getJPackageFromToolchain() {
         getLogger().info("Looking for {} in toolchain", EXECUTABLE);
         try {

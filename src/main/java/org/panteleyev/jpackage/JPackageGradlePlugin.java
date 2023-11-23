@@ -19,6 +19,7 @@ public class JPackageGradlePlugin implements Plugin<Project> {
         target.getTasks().register("jpackage", JPackageTask.class, task -> {
             task.setGroup(GROUP);
             task.setDescription(DESCRIPTION);
+            task.notCompatibleWithConfigurationCache("Will not support configuration cache due to feature set");
         });
     }
 }

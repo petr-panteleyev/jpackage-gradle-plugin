@@ -3,7 +3,7 @@
 Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available since JDK-14.
 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
-[![Gradle](https://img.shields.io/badge/Gradle-6.7.1%2B-green)](https://gradle.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-7.4%2B-green)](https://gradle.org/)
 [![Java](https://img.shields.io/badge/Java-8-orange?logo=java)](https://www.oracle.com/java/technologies/javase-downloads.html)
 [![GitHub](https://img.shields.io/github/license/petr-panteleyev/jpackage-gradle-plugin)](LICENSE)
 
@@ -189,6 +189,10 @@ _Example:_
 ```shell
 $ ./gradlew clean build jpackage --info -Djpackage.dryRun=true
 ```
+
+## Configuration Cache
+
+This plugin is not compatible with Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html).
 
 ## Examples
 
