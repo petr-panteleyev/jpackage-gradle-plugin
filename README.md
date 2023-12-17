@@ -64,6 +64,7 @@ windows {
 <tr><td>icon</td><td>String <sup>(*)</sup></td><td>--icon &lt;icon file path></td><td>14</td><td>*</td></tr>
 <tr><td>input</td><td>String <sup>(*)</sup></td><td>--input &lt;input path></td><td>14</td><td>*</td></tr>
 <tr><td>installDir</td><td>String</td><td>--install-dir &lt;file path></td><td>14</td><td>*</td></tr>
+<tr><td>javaOptions</td><td>List&lt;String></td><td>--java-options &lt;options></td><td>14</td><td>*</td></tr>
 <tr><td>jLinkOptions</td><td>List&lt;String></td><td>--jlink-options &lt;options></td><td>16</td><td>*</td></tr>
 <tr><td>launchers</td><td>List&lt;Launcher> <sup>(*)</sup></td><td>--add-launcher &lt;name>=&lt;property file></td><td>14</td><td>*</td></tr>
 <tr><td>launcherAsService</td><td>Boolean</td><td>--launcher-as-service</td><td>19</td><td>*</td></tr>
@@ -143,6 +144,19 @@ arguments = listOf(
     "SomeArgument",
     "Argument with spaces",
     "Argument with \"quotes\""
+)
+```
+
+### JVM Options
+
+Options that are passed to the JVM when the application is started.
+
+_Example:_
+
+```kotlin
+javaOptions = listOf(
+    "-Xms2m",
+    "-Xmx10m"    
 )
 ```
 
