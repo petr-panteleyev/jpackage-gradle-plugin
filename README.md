@@ -133,6 +133,24 @@ they contain an absolute path.
 |RPM|rpm|
 |DEB|deb|
 
+### Destination Directory
+
+```jpackage``` utility fails if generated binary already exists. In order to work around this behaviour there is plugin
+boolean option ```removeDestination```. If ```true``` plugin will try to delete directory specified by ```destination```.
+This might be useful to relaunch ```jpackage``` task without rebuilding an entire project.
+
+For safety reasons plugin will not process ```removeDestination``` if ```destination``` points to a location outside of 
+```${layout.buildDirectory}``` (or deprecated ```${buildDir}```).
+
+_Example:_
+
+```kotlin
+jpackage {
+    destination = "${layout.buildDirectory.get()}/dist"
+    removeDestination = true
+}
+```
+
 ### Default Command-Line Arguments
 
 Default command line arguments are passed to the main class when the application is started without providing arguments.

@@ -1,5 +1,5 @@
 /*
- Copyright © 2021-2023 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2021-2025 Petr Panteleyev <petr@panteleyev.org>
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
@@ -17,6 +17,7 @@ import org.gradle.jvm.toolchain.JavaToolchainSpec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -82,6 +83,8 @@ import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_SHORTCUT_PROMPT;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPDATE_URL;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPGRADE_UUID;
+import static org.panteleyev.jpackage.DirectoryUtil.isNestedDirectory;
+import static org.panteleyev.jpackage.DirectoryUtil.removeDirectory;
 import static org.panteleyev.jpackage.JDKVersionUtil.getJDKMajorVersion;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
@@ -122,6 +125,8 @@ public class JPackageTask extends DefaultTask {
     private String aboutUrl;
     private boolean launcherAsService;
     private List<String> appContent;
+
+    private Boolean removeDestination;
 
     // Windows specific parameters
     private boolean winMenu;
@@ -464,6 +469,16 @@ public class JPackageTask extends DefaultTask {
 
     public void setAppContent(List<String> appContent) {
         this.appContent = appContent;
+    }
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public Boolean getRemoveDestination() {
+        return removeDestination;
+    }
+
+    public void setRemoveDestination(Boolean removeDestination) {
+        this.removeDestination = removeDestination;
     }
 
     @Input
@@ -940,6 +955,16 @@ public class JPackageTask extends DefaultTask {
 
         if (dryRun) {
             return;
+        }
+
+        Path destinationPath = new File(destination).toPath().toAbsolutePath();
+        if (Boolean.TRUE.equals(removeDestination)) {
+            if (!isNestedDirectory(getProject().getBuildDir().toPath(), destinationPath)) {
+                getLogger().error("Cannot remove destination folder, must belong to {}", getProject().getBuildDir().toPath());
+            } else {
+                getLogger().warn("Trying to remove destination {}", destinationPath);
+                removeDirectory(destinationPath);
+            }
         }
 
         try {
