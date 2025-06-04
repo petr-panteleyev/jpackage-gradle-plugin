@@ -18,7 +18,7 @@ tasks.jpackage {
     copyright = "Copyright (c) 2020 Vendor"
     runtimeImage = System.getProperty("java.home")
     module = "org.app.module/org.app.MainClass"
-    modulePaths = listOf(File("${layout.buildDirectory.get()}/jmods"))
+    modulePaths = listOf("${layout.buildDirectory.get()}/jmods")
     destination = "${layout.buildDirectory.get()}/dist"
     javaOptions = listOf("-Dfile.encoding=UTF-8")
 
