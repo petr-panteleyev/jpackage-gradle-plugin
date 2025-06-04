@@ -2,18 +2,18 @@
 
 ```kotlin
 task("copyDependencies", Copy::class) {
-    from(configurations.runtimeClasspath).into("$buildDir/jars")
+    from(configurations.runtimeClasspath).into("${layout.buildDirectory.get()}//jars")
 }
 
 task("copyJar", Copy::class) {
-    from(tasks.jar).into("$buildDir/jars")
+    from(tasks.jar).into("${layout.buildDirectory.get()}//jars")
 }
 
 tasks.jpackage {
     dependsOn("build", "copyDependencies", "copyJar")
 
-    input  = "$buildDir/jars"
-    destination = "$buildDir/dist"
+    input  = "${layout.buildDirectory.get()}/jars"
+    destination = "${layout.buildDirectory.get()}/dist"
 
     appName = "Non-Modular Application"
     vendor = "app.org"
