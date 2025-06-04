@@ -19,7 +19,7 @@ tasks.jpackage {
     runtimeImage = System.getProperty("java.home")
     module = "org.app.module/org.app.MainClass"
     modulePaths = listOf(File("$buildDir/jmods"))
-    destination = "$buildDir/dist"
+    destination = "${layout.buildDirectory.get()}/dist"
     javaOptions = listOf("-Dfile.encoding=UTF-8")
 
     mac {
