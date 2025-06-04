@@ -2,11 +2,11 @@
 
 ```kotlin
 task("copyDependencies", Copy::class) {
-    from(configurations.runtimeClasspath).into("$buildDir/jmods")
+    from(configurations.runtimeClasspath).into("${layout.buildDirectory.get()}/jmods")
 }
 
 task("copyJar", Copy::class) {
-    from(tasks.jar).into("$buildDir/jmods")
+    from(tasks.jar).into("${layout.buildDirectory.get()}/jmods")
 }
 
 tasks.jpackage {
@@ -18,7 +18,7 @@ tasks.jpackage {
     copyright = "Copyright (c) 2020 Vendor"
     runtimeImage = System.getProperty("java.home")
     module = "org.app.module/org.app.MainClass"
-    modulePaths = listOf(File("$buildDir/jmods"))
+    modulePaths = listOf(File("${layout.buildDirectory.get()}/jmods"))
     destination = "${layout.buildDirectory.get()}/dist"
     javaOptions = listOf("-Dfile.encoding=UTF-8")
 
