@@ -1,5 +1,5 @@
 /*
- Copyright © 2021-2023 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2021-2025 Petr Panteleyev <petr@panteleyev.org>
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
@@ -19,7 +19,6 @@ public class JPackageGradlePlugin implements Plugin<Project> {
         target.getTasks().register("jpackage", JPackageTask.class, task -> {
             task.setGroup(GROUP);
             task.setDescription(DESCRIPTION);
-            task.notCompatibleWithConfigurationCache("Will not support configuration cache due to feature set");
         });
     }
 }

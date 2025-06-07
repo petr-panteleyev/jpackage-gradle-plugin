@@ -1,11 +1,11 @@
 # Non-Modular Application
 
 ```kotlin
-task("copyDependencies", Copy::class) {
+tasks.register("copyDependencies", Copy::class) {
     from(configurations.runtimeClasspath).into("${layout.buildDirectory.get()}//jars")
 }
 
-task("copyJar", Copy::class) {
+tasks.register("copyJar", Copy::class) {
     from(tasks.jar).into("${layout.buildDirectory.get()}//jars")
 }
 

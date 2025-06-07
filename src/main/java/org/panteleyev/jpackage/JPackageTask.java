@@ -6,20 +6,25 @@ package org.panteleyev.jpackage;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.jvm.toolchain.JavaToolchainSpec;
 
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,700 +90,299 @@ import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPDATE_URL;
 import static org.panteleyev.jpackage.CommandLineParameter.WIN_UPGRADE_UUID;
 import static org.panteleyev.jpackage.DirectoryUtil.isNestedDirectory;
 import static org.panteleyev.jpackage.DirectoryUtil.removeDirectory;
-import static org.panteleyev.jpackage.JDKVersionUtil.getJDKMajorVersion;
 import static org.panteleyev.jpackage.OsUtil.isLinux;
 import static org.panteleyev.jpackage.OsUtil.isMac;
 import static org.panteleyev.jpackage.OsUtil.isWindows;
 import static org.panteleyev.jpackage.StringUtil.escape;
 
 @SuppressWarnings({"SameParameterValue", "unused"})
-public class JPackageTask extends DefaultTask {
+public abstract class JPackageTask extends DefaultTask {
     static final String EXECUTABLE = "jpackage";
 
-    private boolean verbose;
-    private ImageType type = ImageType.DEFAULT;
-    private String appName;
-    private String appImage;
-    private String appVersion = getProject().getVersion().toString();
-    private String vendor;
-    private String icon;
-    private String runtimeImage;
-    private String input;
-    private String installDir;
-    private String destination;
-    private String module;
-    private String mainClass;
-    private String mainJar;
-    private String copyright;
-    private String appDescription;
-    private List<String> modulePaths;
-    private String licenseFile;
-    private String resourceDir;
-    private String temp;
-    private List<String> javaOptions;
-    private List<String> arguments;
-    private List<String> fileAssociations;
-    private List<Launcher> launchers;
-    private List<String> addModules;
-    private boolean bindServices;
-    private List<String> jLinkOptions;
-    private String aboutUrl;
-    private boolean launcherAsService;
-    private List<String> appContent;
-
-    private Boolean removeDestination;
-
-    // Windows specific parameters
-    private boolean winMenu;
-    private boolean winDirChooser;
-    private String winUpgradeUuid;
-    private String winMenuGroup;
-    private boolean winShortcut;
-    private boolean winPerUserInstall;
-    private boolean winConsole;
-    private String winHelpUrl;
-    private boolean winShortcutPrompt;
-    private String winUpdateUrl;
-
-    // OS X specific parameters
-    private String macPackageIdentifier;
-    private String macPackageName;
-    private String macPackageSigningPrefix;
-    private String macBundleSigningPrefix;
-    private boolean macSign;
-    private String macSigningKeychain;
-    private String macSigningKeyUserName;
-    private boolean macAppStore;
-    private String macAppCategory;
-    private String macEntitlements;
-    private List<String> macDmgContent;
-
-    // Linux specific parameters
-    private String linuxPackageName;
-    private String linuxDebMaintainer;
-    private String linuxMenuGroup;
-    private String linuxRpmLicenseType;
-    private String linuxAppRelease;
-    private String linuxAppCategory;
-    private boolean linuxShortcut;
-    private boolean linuxPackageDeps;
-
-    // Additional parameters
-    private List<String> additionalParameters = new ArrayList<>();
-
-    // JPackage process environment variables
-    private Map<String, String> jpackageEnvironment;
+    private final File buildDir;
+    private final String projectVersion = getProject().getVersion().toString();
 
     // Plugin internal options
     private final boolean dryRun;
 
     public JPackageTask() {
         dryRun = Boolean.getBoolean("jpackage.dryRun");
+        buildDir = getProject().getBuildDir();
+        getOutputs().upToDateWhen(element -> false);
+
+        try {
+            JavaToolchainSpec toolchain = getProject().getExtensions()
+                    .getByType(JavaPluginExtension.class).getToolchain();
+            Provider<JavaLauncher> defaultLauncher = getJavaToolchainService().launcherFor(toolchain);
+            getJavaLauncher().convention(defaultLauncher);
+        } catch (Exception ex) {
+            getLogger().trace("Failed to configure JavaLauncher");
+        }
     }
 
-    @Input
-    public boolean getVerbose() {
-        return verbose;
-    }
+    @Inject
+    public abstract JavaToolchainService getJavaToolchainService();
 
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
+    @Inject
+    public abstract ProjectLayout getProjectLayout();
 
-    @Input
-    public ImageType getType() {
-        return type;
-    }
-
-    public void setType(ImageType type) {
-        this.type = type;
-    }
+    @Nested
+    @org.gradle.api.tasks.Optional
+    public abstract Property<JavaLauncher> getJavaLauncher();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
+    public abstract Property<Boolean> getVerbose();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getAppImage() {
-        return appImage;
-    }
-
-    public void setAppImage(String appImage) {
-        this.appImage = appImage;
-    }
-
-    @Input
-    public String getAppVersion() {
-        return appVersion;
-    }
-
-    public void setAppVersion(String appVersion) {
-        this.appVersion = appVersion;
-    }
+    public abstract Property<ImageType> getType();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getVendor() {
-        return vendor;
-    }
-
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
-    }
+    public abstract Property<String> getAppName();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
+    public abstract Property<String> getAppImage();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getRuntimeImage() {
-        return runtimeImage;
-    }
-
-    public void setRuntimeImage(String runtimeImage) {
-        this.runtimeImage = runtimeImage;
-    }
+    public abstract Property<String> getAppVersion();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getInput() {
-        return input;
-    }
-
-    public void setInput(String input) {
-        this.input = input;
-    }
+    public abstract Property<String> getVendor();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getInstallDir() {
-        return installDir;
-    }
-
-    public void setInstallDir(String installDir) {
-        this.installDir = installDir;
-    }
+    public abstract Property<String> getIcon();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
+    public abstract Property<String> getRuntimeImage();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getModule() {
-        return module;
-    }
-
-    public void setModule(String module) {
-        this.module = module;
-    }
+    public abstract Property<String> getInput();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMainClass() {
-        return mainClass;
-    }
+    public abstract Property<String> getInstallDir();
 
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-    }
+    @OutputDirectory
+    public abstract Property<String> getDestination();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMainJar() {
-        return mainJar;
-    }
-
-    public void setMainJar(String mainJar) {
-        this.mainJar = mainJar;
-    }
+    public abstract Property<String> getModule();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getCopyright() {
-        return copyright;
-    }
-
-    public void setCopyright(String copyright) {
-        this.copyright = copyright;
-    }
+    public abstract Property<String> getMainClass();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getAppDescription() {
-        return appDescription;
-    }
-
-    public void setAppDescription(String appDescription) {
-        this.appDescription = appDescription;
-    }
+    public abstract Property<String> getMainJar();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getModulePaths() {
-        return modulePaths;
-    }
-
-    public void setModulePaths(List<String> modulePaths) {
-        this.modulePaths = modulePaths;
-    }
+    public abstract Property<String> getCopyright();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLicenseFile() {
-        return licenseFile;
-    }
-
-    public void setLicenseFile(String licenseFile) {
-        this.licenseFile = licenseFile;
-    }
+    public abstract Property<String> getAppDescription();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getResourceDir() {
-        return resourceDir;
-    }
-
-    public void setResourceDir(String resourceDir) {
-        this.resourceDir = resourceDir;
-    }
+    public abstract ListProperty<String> getModulePaths();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getTemp() {
-        return temp;
-    }
-
-    public void setTemp(String temp) {
-        this.temp = temp;
-    }
+    public abstract Property<String> getLicenseFile();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getJavaOptions() {
-        return javaOptions;
-    }
-
-    public void setJavaOptions(List<String> javaOptions) {
-        this.javaOptions = javaOptions;
-    }
+    public abstract Property<String> getResourceDir();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getArguments() {
-        return arguments;
-    }
-
-    public void setArguments(List<String> arguments) {
-        this.arguments = arguments;
-    }
+    public abstract Property<String> getTemp();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getFileAssociations() {
-        return fileAssociations;
-    }
-
-    public void setFileAssociations(List<String> fileAssociations) {
-        this.fileAssociations = fileAssociations;
-    }
+    public abstract ListProperty<String> getJavaOptions();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<Launcher> getLaunchers() {
-        return launchers;
-    }
-
-    public void setLaunchers(List<Launcher> launchers) {
-        this.launchers = launchers;
-    }
+    public abstract ListProperty<String> getArguments();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getAddModules() {
-        return addModules;
-    }
-
-    public void setAddModules(List<String> addModules) {
-        this.addModules = addModules;
-    }
-
-    @Input
-    public boolean getBindServices() {
-        return bindServices;
-    }
-
-    public void setBindServices(boolean bindServices) {
-        this.bindServices = bindServices;
-    }
+    public abstract ListProperty<String> getFileAssociations();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getJLinkOptions() {
-        return jLinkOptions;
-    }
-
-    public void setJLinkOptions(List<String> jLinkOptions) {
-        this.jLinkOptions = jLinkOptions;
-    }
+    public abstract ListProperty<Launcher> getLaunchers();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getAboutUrl() {
-        return aboutUrl;
-    }
-
-    public void setAboutUrl(String aboutUrl) {
-        this.aboutUrl = aboutUrl;
-    }
-
-    @Input
-    public boolean getLauncherAsService() {
-        return launcherAsService;
-    }
-
-    public void setLauncherAsService(boolean launcherAsService) {
-        this.launcherAsService = launcherAsService;
-    }
+    public abstract ListProperty<String> getAddModules();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getAppContent() {
-        return appContent;
-    }
-
-    public void setAppContent(List<String> appContent) {
-        this.appContent = appContent;
-    }
+    @Deprecated
+    public abstract Property<Boolean> getBindServices();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public Boolean getRemoveDestination() {
-        return removeDestination;
-    }
-
-    public void setRemoveDestination(Boolean removeDestination) {
-        this.removeDestination = removeDestination;
-    }
-
-    @Input
-    public boolean getWinMenu() {
-        return winMenu;
-    }
-
-    public void setWinMenu(boolean winMenu) {
-        this.winMenu = winMenu;
-    }
-
-    @Input
-    public boolean getWinDirChooser() {
-        return winDirChooser;
-    }
-
-    public void setWinDirChooser(boolean winDirChooser) {
-        this.winDirChooser = winDirChooser;
-    }
+    public abstract ListProperty<String> getJLinkOptions();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getWinUpgradeUuid() {
-        return winUpgradeUuid;
-    }
-
-    public void setWinUpgradeUuid(String winUpgradeUuid) {
-        this.winUpgradeUuid = winUpgradeUuid;
-    }
+    public abstract Property<String> getAboutUrl();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getWinMenuGroup() {
-        return winMenuGroup;
-    }
-
-    public void setWinMenuGroup(String winMenuGroup) {
-        this.winMenuGroup = winMenuGroup;
-    }
-
-    @Input
-    public boolean getWinShortcut() {
-        return winShortcut;
-    }
-
-    public void setWinShortcut(boolean winShortcut) {
-        this.winShortcut = winShortcut;
-    }
-
-    @Input
-    public boolean getWinPerUserInstall() {
-        return winPerUserInstall;
-    }
-
-    public void setWinPerUserInstall(boolean winPerUserInstall) {
-        this.winPerUserInstall = winPerUserInstall;
-    }
-
-    @Input
-    public boolean getWinConsole() {
-        return winConsole;
-    }
-
-    public void setWinConsole(boolean winConsole) {
-        this.winConsole = winConsole;
-    }
+    public abstract Property<Boolean> getLauncherAsService();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getWinHelpUrl() {
-        return winHelpUrl;
-    }
-
-    public void setWinHelpUrl(String winHelpUrl) {
-        this.winHelpUrl = winHelpUrl;
-    }
-
-    @Input
-    public boolean getWinShortcutPrompt() {
-        return winShortcutPrompt;
-    }
-
-    public void setWinShortcutPrompt(boolean winShortcutPrompt) {
-        this.winShortcutPrompt = winShortcutPrompt;
-    }
+    public abstract ListProperty<String> getAppContent();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getWinUpdateUrl() {
-        return winUpdateUrl;
-    }
+    public abstract Property<Boolean> getRemoveDestination();
 
-    public void setWinUpdateUrl(String winUpdateUrl) {
-        this.winUpdateUrl = winUpdateUrl;
-    }
+    // Windows specific parameters
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacPackageIdentifier() {
-        return macPackageIdentifier;
-    }
-
-    public void setMacPackageIdentifier(String macPackageIdentifier) {
-        this.macPackageIdentifier = macPackageIdentifier;
-    }
+    public abstract Property<Boolean> getWinMenu();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacPackageName() {
-        return macPackageName;
-    }
-
-    public void setMacPackageName(String macPackageName) {
-        this.macPackageName = macPackageName;
-    }
+    public abstract Property<Boolean> getWinDirChooser();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacPackageSigningPrefix() {
-        return macPackageSigningPrefix;
-    }
-
-    public void setMacPackageSigningPrefix(String macPackageSigningPrefix) {
-        this.macPackageSigningPrefix = macPackageSigningPrefix;
-    }
+    public abstract Property<String> getWinUpgradeUuid();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacBundleSigningPrefix() {
-        return macBundleSigningPrefix;
-    }
-
-    public void setMacBundleSigningPrefix(String macBundleSigningPrefix) {
-        this.macBundleSigningPrefix = macBundleSigningPrefix;
-    }
-
-    @Input
-    public boolean getMacSign() {
-        return macSign;
-    }
-
-    public void setMacSign(boolean macSign) {
-        this.macSign = macSign;
-    }
+    public abstract Property<String> getWinMenuGroup();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacSigningKeychain() {
-        return macSigningKeychain;
-    }
-
-    public void setMacSigningKeychain(String macSigningKeychain) {
-        this.macSigningKeychain = macSigningKeychain;
-    }
+    public abstract Property<Boolean> getWinShortcut();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacSigningKeyUserName() {
-        return macSigningKeyUserName;
-    }
-
-    public void setMacSigningKeyUserName(String macSigningKeyUserName) {
-        this.macSigningKeyUserName = macSigningKeyUserName;
-    }
-
-    @Input
-    public boolean getMacAppStore() {
-        return macAppStore;
-    }
-
-    public void setMacAppStore(boolean macAppStore) {
-        this.macAppStore = macAppStore;
-    }
+    public abstract Property<Boolean> getWinPerUserInstall();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacAppCategory() {
-        return macAppCategory;
-    }
-
-    public void setMacAppCategory(String macAppCategory) {
-        this.macAppCategory = macAppCategory;
-    }
+    public abstract Property<Boolean> getWinConsole();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getMacEntitlements() {
-        return macEntitlements;
-    }
-
-    public void setMacEntitlements(String macEntitlements) {
-        this.macEntitlements = macEntitlements;
-    }
+    public abstract Property<String> getWinHelpUrl();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public List<String> getMacDmgContent() {
-        return macDmgContent;
-    }
-
-    public void setMacDmgContent(List<String> macDmgContent) {
-        this.macDmgContent = macDmgContent;
-    }
+    public abstract Property<Boolean> getWinShortcutPrompt();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxPackageName() {
-        return linuxPackageName;
-    }
+    public abstract Property<String> getWinUpdateUrl();
 
-    public void setLinuxPackageName(String linuxPackageName) {
-        this.linuxPackageName = linuxPackageName;
-    }
+    // OS X specific parameters
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxDebMaintainer() {
-        return linuxDebMaintainer;
-    }
-
-    public void setLinuxDebMaintainer(String linuxDebMaintainer) {
-        this.linuxDebMaintainer = linuxDebMaintainer;
-    }
+    public abstract Property<String> getMacPackageIdentifier();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxMenuGroup() {
-        return linuxMenuGroup;
-    }
-
-    public void setLinuxMenuGroup(String linuxMenuGroup) {
-        this.linuxMenuGroup = linuxMenuGroup;
-    }
+    public abstract Property<String> getMacPackageName();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxRpmLicenseType() {
-        return linuxRpmLicenseType;
-    }
-
-    public void setLinuxRpmLicenseType(String linuxRpmLicenseType) {
-        this.linuxRpmLicenseType = linuxRpmLicenseType;
-    }
+    public abstract Property<String> getMacPackageSigningPrefix();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxAppRelease() {
-        return linuxAppRelease;
-    }
-
-    public void setLinuxAppRelease(String linuxAppRelease) {
-        this.linuxAppRelease = linuxAppRelease;
-    }
+    public abstract Property<String> getMacBundleSigningPrefix();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public String getLinuxAppCategory() {
-        return linuxAppCategory;
-    }
-
-    public void setLinuxAppCategory(String linuxAppCategory) {
-        this.linuxAppCategory = linuxAppCategory;
-    }
-
-    @Input
-    public boolean getLinuxShortcut() {
-        return linuxShortcut;
-    }
-
-    public void setLinuxShortcut(boolean linuxShortcut) {
-        this.linuxShortcut = linuxShortcut;
-    }
-
-    @Input
-    public boolean getLinuxPackageDeps() {
-        return linuxPackageDeps;
-    }
-
-    public void setLinuxPackageDeps(boolean linuxPackageDeps) {
-        this.linuxPackageDeps = linuxPackageDeps;
-    }
-
-    @Input
-    public List<String> getAdditionalParameters() {
-        return additionalParameters;
-    }
-
-    public void setAdditionalParameters(List<String> additionalParameters) {
-        this.additionalParameters = additionalParameters;
-    }
+    public abstract Property<Boolean> getMacSign();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public Map<String, String> getJpackageEnvironment() {
-        return jpackageEnvironment;
-    }
+    public abstract Property<String> getMacSigningKeychain();
 
-    public void setJpackageEnvironment(Map<String, String> jpackageEnvironment) {
-        this.jpackageEnvironment = jpackageEnvironment;
-    }
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getMacSigningKeyUserName();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<Boolean> getMacAppStore();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getMacAppCategory();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getMacEntitlements();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract ListProperty<String> getMacDmgContent();
+
+    // Linux specific parameters
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxPackageName();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxDebMaintainer();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxMenuGroup();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxRpmLicenseType();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxAppRelease();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<String> getLinuxAppCategory();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<Boolean> getLinuxShortcut();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<Boolean> getLinuxPackageDeps();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract ListProperty<String> getAdditionalParameters();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract MapProperty<String, String> getJpackageEnvironment();
 
     @TaskAction
     public void action() {
@@ -806,13 +410,14 @@ public class JPackageTask extends DefaultTask {
     private Optional<String> getJPackageFromToolchain() {
         getLogger().info("Looking for {} in toolchain", EXECUTABLE);
         try {
-            JavaToolchainSpec toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
-            JavaToolchainService service = getProject().getExtensions().getByType(JavaToolchainService.class);
-            Provider<JavaLauncher> defaultLauncher = service.launcherFor(toolchain);
-            String home = defaultLauncher.get().getMetadata().getInstallationPath().getAsFile().getAbsolutePath();
-
-            getLogger().info("toolchain: " + home);
-            return buildExecutablePath(home);
+            JavaLauncher launcherValue = getJavaLauncher().getOrNull();
+            if (launcherValue == null) {
+                throw new RuntimeException();
+            } else {
+                String home = launcherValue.getMetadata().getInstallationPath().getAsFile().getAbsolutePath();
+                getLogger().info("toolchain: {}", home);
+                return buildExecutablePath(home);
+            }
         } catch (Exception ex) {
             getLogger().info("Toolchain is not configured");
             return Optional.empty();
@@ -829,138 +434,143 @@ public class JPackageTask extends DefaultTask {
         return buildExecutablePath(javaHome);
     }
 
-    private void buildParameters(Collection<String> parameters, int version) {
-        addParameter(parameters, ABOUT_URL, aboutUrl, version);
-        if (launchers != null) {
-            for (Launcher launcher : launchers) {
-                File launcherFile = getProject().file(launcher.getFilePath());
+    private void buildParameters(Parameters parameters) {
+        parameters.addString(ABOUT_URL, getAboutUrl());
+        if (getLaunchers().isPresent()) {
+            for (Launcher launcher : getLaunchers().get()) {
+                File launcherFile = new File(launcher.getFilePath());
                 if (!launcherFile.exists()) {
-                    throw new GradleException("Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
+                    throw new GradleException(
+                            "Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
                 }
-                addParameter(parameters, ADD_LAUNCHER,
-                        launcher.getName() + "=" + launcherFile.getAbsolutePath(), version);
+                parameters.addString(ADD_LAUNCHER, launcher.getName() + "=" + launcherFile.getAbsolutePath());
             }
         }
-        if (addModules != null && !addModules.isEmpty()) {
-            addParameter(parameters, ADD_MODULES, String.join(",", addModules), version);
-        }
-        if (appContent != null) {
-            for (Object appContentElement : appContent) {
-                addFileParameter(parameters, APP_CONTENT, appContentElement.toString(), true, version);
+        if (getAddModules().isPresent()) {
+            List<String> addModules = getAddModules().get();
+            if (!addModules.isEmpty()) {
+                parameters.addString(ADD_MODULES, String.join(",", addModules));
             }
         }
-        addFileParameter(parameters, APP_IMAGE, appImage, version);
-        addParameter(parameters, APP_VERSION, appVersion, version);
-        if (arguments != null) {
-            for (Object arg : arguments) {
-                addParameter(parameters, ARGUMENTS, escape(arg.toString()), version);
+        if (getAppContent().isPresent()) {
+            for (Object appContentElement : getAppContent().get()) {
+                parameters.addFile(APP_CONTENT, appContentElement.toString(), true);
             }
         }
-        addParameter(parameters, BIND_SERVICES, bindServices, version);
-        addParameter(parameters, COPYRIGHT, copyright, version);
-        addParameter(parameters, DESCRIPTION, appDescription, version);
-        addFileParameter(parameters, DESTINATION, destination, false, version);
-        if (fileAssociations != null) {
-            for (Object association : fileAssociations) {
-                addFileParameter(parameters, FILE_ASSOCIATIONS, association.toString(), true, version);
+        parameters.addFile(APP_IMAGE, getAppImage(), true);
+        parameters.addString(APP_VERSION, getAppVersion().getOrElse(projectVersion));
+        if (getArguments().isPresent()) {
+            for (Object arg : getArguments().get()) {
+                parameters.addString(ARGUMENTS, escape(arg.toString()));
             }
         }
-        addFileParameter(parameters, ICON, icon, true, version);
-        addFileParameter(parameters, INPUT, input, true, version);
-        addParameter(parameters, INSTALL_DIR, installDir, version);
-        if (javaOptions != null) {
-            for (Object option : javaOptions) {
-                addParameter(parameters, JAVA_OPTIONS, escape(option.toString()), version);
+        parameters.addBoolean(BIND_SERVICES, getBindServices());
+        parameters.addString(COPYRIGHT, getCopyright());
+        parameters.addString(DESCRIPTION, getAppDescription());
+        parameters.addFile(DESTINATION, getDestination(), false);
+        if (getFileAssociations().isPresent()) {
+            for (Object association : getFileAssociations().get()) {
+                parameters.addFile(FILE_ASSOCIATIONS, association.toString(), true);
             }
         }
-        if (jLinkOptions != null && !jLinkOptions.isEmpty()) {
-            addParameter(parameters, JLINK_OPTIONS, String.join(" ", jLinkOptions), version);
-        }
-        addParameter(parameters, LAUNCHER_AS_SERVICE, launcherAsService, version);
-        addFileParameter(parameters, LICENSE_FILE, licenseFile, true, version);
-        addParameter(parameters, MAIN_CLASS, mainClass, version);
-        addParameter(parameters, MAIN_JAR, mainJar, version);
-        addParameter(parameters, MODULE, module, version);
-        if (modulePaths != null) {
-            for (Object path : modulePaths) {
-                addFileParameter(parameters, MODULE_PATH, path.toString(), version);
+        parameters.addFile(ICON, getIcon(), true);
+        parameters.addFile(INPUT, getInput(), true);
+        parameters.addString(INSTALL_DIR, getInstallDir());
+        if (getJavaOptions().isPresent()) {
+            for (Object option : getJavaOptions().get()) {
+                parameters.addString(JAVA_OPTIONS, escape(option.toString()));
             }
         }
-        addParameter(parameters, NAME, appName, version);
-        addFileParameter(parameters, RESOURCE_DIR, resourceDir, true, version);
-        addFileParameter(parameters, RUNTIME_IMAGE, runtimeImage, true, version);
-        addFileParameter(parameters, TEMP, temp, false, version);
+
+        if (getJLinkOptions().isPresent()) {
+            List<String> jLinkOptions = getJLinkOptions().get();
+            if (!jLinkOptions.isEmpty()) {
+                parameters.addString(JLINK_OPTIONS, String.join(" ", jLinkOptions));
+            }
+        }
+
+        parameters.addBoolean(LAUNCHER_AS_SERVICE, getLauncherAsService());
+        parameters.addFile(LICENSE_FILE, getLicenseFile(), true);
+        parameters.addString(MAIN_CLASS, getMainClass());
+        parameters.addString(MAIN_JAR, getMainJar());
+        parameters.addString(MODULE, getModule());
+        if (getModulePaths().isPresent()) {
+            for (Object path : getModulePaths().get()) {
+                parameters.addFile(MODULE_PATH, path.toString(), true);
+            }
+        }
+        parameters.addString(NAME, getAppName());
+        parameters.addFile(RESOURCE_DIR, getResourceDir(), true);
+        parameters.addFile(RUNTIME_IMAGE, getRuntimeImage(), true);
+        parameters.addFile(TEMP, getTemp(), false);
+
+        ImageType type = getType().getOrElse(ImageType.DEFAULT);
         if (type != ImageType.DEFAULT) {
-            addParameter(parameters, TYPE, type, version);
+            parameters.addString(TYPE, type.getValue());
         }
-        addParameter(parameters, VENDOR, vendor, version);
-        addParameter(parameters, VERBOSE, verbose, version);
+
+        parameters.addString(VENDOR, getVendor());
+        parameters.addBoolean(VERBOSE, getVerbose());
 
         if (isMac()) {
-            addParameter(parameters, MAC_APP_CATEGORY, macAppCategory, version);
-            addParameter(parameters, MAC_APP_STORE, macAppStore, version);
-            addParameter(parameters, MAC_BUNDLE_SIGNING_PREFIX, macBundleSigningPrefix, version);
-            if (macDmgContent != null) {
-                for (Object dmgContent : macDmgContent) {
-                    addFileParameter(parameters, MAC_DMG_CONTENT, dmgContent.toString(), true, version);
+            parameters.addString(MAC_APP_CATEGORY, getMacAppCategory());
+            parameters.addBoolean(MAC_APP_STORE, getMacAppStore());
+            parameters.addString(MAC_BUNDLE_SIGNING_PREFIX, getMacBundleSigningPrefix());
+            if (getMacDmgContent().isPresent()) {
+                for (Object dmgContent : getMacDmgContent().get()) {
+                    parameters.addFile(MAC_DMG_CONTENT, dmgContent.toString(), true);
                 }
             }
-            addFileParameter(parameters, MAC_ENTITLEMENTS, macEntitlements, true, version);
-            addParameter(parameters, MAC_PACKAGE_IDENTIFIER, macPackageIdentifier, version);
-            addParameter(parameters, MAC_PACKAGE_NAME, macPackageName, version);
-            addParameter(parameters, MAC_PACKAGE_SIGNING_PREFIX, macPackageSigningPrefix, version);
-            addParameter(parameters, MAC_SIGN, macSign, version);
-            addParameter(parameters, MAC_SIGNING_KEY_USER_NAME, macSigningKeyUserName, version);
-            addFileParameter(parameters, MAC_SIGNING_KEYCHAIN, macSigningKeychain, true, version);
+            parameters.addFile(MAC_ENTITLEMENTS, getMacEntitlements(), true);
+            parameters.addString(MAC_PACKAGE_IDENTIFIER, getMacPackageIdentifier());
+            parameters.addString(MAC_PACKAGE_NAME, getMacPackageName());
+            parameters.addString(MAC_PACKAGE_SIGNING_PREFIX, getMacBundleSigningPrefix());
+            parameters.addBoolean(MAC_SIGN, getMacSign());
+            parameters.addString(MAC_SIGNING_KEY_USER_NAME, getMacSigningKeyUserName());
+            parameters.addFile(MAC_SIGNING_KEYCHAIN, getMacSigningKeychain(), true);
         } else if (isWindows()) {
-            addParameter(parameters, WIN_CONSOLE, winConsole, version);
-            addParameter(parameters, WIN_DIR_CHOOSER, winDirChooser, version);
-            addParameter(parameters, WIN_HELP_URL, winHelpUrl, version);
-            addParameter(parameters, WIN_MENU, winMenu, version);
-            addParameter(parameters, WIN_MENU_GROUP, winMenuGroup, version);
-            addParameter(parameters, WIN_PER_USER_INSTALL, winPerUserInstall, version);
-            addParameter(parameters, WIN_SHORTCUT, winShortcut, version);
-            addParameter(parameters, WIN_SHORTCUT_PROMPT, winShortcutPrompt, version);
-            addParameter(parameters, WIN_UPDATE_URL, winUpdateUrl, version);
-            addParameter(parameters, WIN_UPGRADE_UUID, winUpgradeUuid, version);
+            parameters.addBoolean(WIN_CONSOLE, getWinConsole());
+            parameters.addBoolean(WIN_DIR_CHOOSER, getWinDirChooser());
+            parameters.addString(WIN_HELP_URL, getWinHelpUrl());
+            parameters.addBoolean(WIN_MENU, getWinMenu());
+            parameters.addString(WIN_MENU_GROUP, getWinMenuGroup());
+            parameters.addBoolean(WIN_PER_USER_INSTALL, getWinPerUserInstall());
+            parameters.addBoolean(WIN_SHORTCUT, getWinShortcut());
+            parameters.addBoolean(WIN_SHORTCUT_PROMPT, getWinShortcutPrompt());
+            parameters.addString(WIN_UPDATE_URL, getWinUpdateUrl());
+            parameters.addString(WIN_UPGRADE_UUID, getWinUpgradeUuid());
         } else if (isLinux()) {
-            addParameter(parameters, LINUX_APP_CATEGORY, linuxAppCategory, version);
-            addParameter(parameters, LINUX_APP_RELEASE, linuxAppRelease, version);
-            addParameter(parameters, LINUX_DEB_MAINTAINER, linuxDebMaintainer, version);
-            addParameter(parameters, LINUX_MENU_GROUP, linuxMenuGroup, version);
-            addParameter(parameters, LINUX_PACKAGE_DEPS, linuxPackageDeps, version);
-            addParameter(parameters, LINUX_PACKAGE_NAME, linuxPackageName, version);
-            addParameter(parameters, LINUX_RPM_LICENSE_TYPE, linuxRpmLicenseType, version);
-            addParameter(parameters, LINUX_SHORTCUT, linuxShortcut, version);
+            parameters.addString(LINUX_APP_CATEGORY, getLinuxAppCategory());
+            parameters.addString(LINUX_APP_RELEASE, getLinuxAppRelease());
+            parameters.addString(LINUX_DEB_MAINTAINER, getLinuxDebMaintainer());
+            parameters.addString(LINUX_MENU_GROUP, getLinuxMenuGroup());
+            parameters.addBoolean(LINUX_PACKAGE_DEPS, getLinuxPackageDeps());
+            parameters.addString(LINUX_PACKAGE_NAME, getLinuxPackageName());
+            parameters.addString(LINUX_RPM_LICENSE_TYPE, getLinuxRpmLicenseType());
+            parameters.addBoolean(LINUX_SHORTCUT, getLinuxShortcut());
         }
 
         // Additional options
-        for (Object option : additionalParameters) {
-            addAdditionalParameter(parameters, option.toString());
+        if (getAdditionalParameters().isPresent()) {
+            for (Object option : getAdditionalParameters().get()) {
+                parameters.add(option.toString());
+            }
         }
     }
 
     private void execute(String cmd) {
-        int version = getJDKMajorVersion(cmd);
-        if (version == 0) {
-            getLogger().warn("Could not determine " + EXECUTABLE + " version, parameter check will be skipped");
-            getLogger().info("Using: {}", cmd);
-        } else {
-            getLogger().info("Using: {}, major version: {}", cmd, version);
-        }
-
-        List<String> parameters = new ArrayList<>();
+        Parameters parameters = new Parameters(getLogger(), getProjectLayout().getProjectDirectory());
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
-        buildParameters(parameters, version);
+        buildParameters(parameters);
 
         if (dryRun) {
             return;
         }
 
-        Path destinationPath = new File(destination).toPath().toAbsolutePath();
-        if (Boolean.TRUE.equals(removeDestination)) {
-            if (!isNestedDirectory(getProject().getBuildDir().toPath(), destinationPath)) {
-                getLogger().error("Cannot remove destination folder, must belong to {}", getProject().getBuildDir().toPath());
+        Path destinationPath = new File(getDestination().get()).toPath().toAbsolutePath();
+        if (getRemoveDestination().getOrElse(false)) {
+            if (!isNestedDirectory(buildDir.toPath(), destinationPath)) {
+                getLogger().error("Cannot remove destination folder, must belong to {}", buildDir.toPath());
             } else {
                 getLogger().warn("Trying to remove destination {}", destinationPath);
                 removeDirectory(destinationPath);
@@ -970,27 +580,30 @@ public class JPackageTask extends DefaultTask {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder();
 
-            if (jpackageEnvironment != null && !jpackageEnvironment.isEmpty()) {
-                getLogger().info(EXECUTABLE + " environment:");
+            if (getJpackageEnvironment().isPresent()) {
+                Map<String, String> jPackageEnvironment = getJpackageEnvironment().get();
+                if (!jPackageEnvironment.isEmpty()) {
+                    getLogger().info(EXECUTABLE + " environment:");
 
-                Map<String, String> environment = processBuilder.environment();
-                for (Map.Entry<String, String> entry : jpackageEnvironment.entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
+                    Map<String, String> environment = processBuilder.environment();
+                    for (Map.Entry<String, String> entry : jPackageEnvironment.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
 
-                    if (key == null || key.trim().isEmpty() || value == null) {
-                        // Silently skip null or empty keys or null values
-                        continue;
+                        if (key == null || key.trim().isEmpty() || value == null) {
+                            // Silently skip null or empty keys or null values
+                            continue;
+                        }
+
+                        environment.put(key, value);
+                        getLogger().info("  {} = {}", key, value);
                     }
-
-                    environment.put(key, value);
-                    getLogger().info("  " + key + " = " + value);
                 }
             }
 
             Process process = processBuilder
                     .redirectErrorStream(true)
-                    .command(parameters)
+                    .command(parameters.getParams())
                     .start();
 
             getLogger().info(EXECUTABLE + " output:");
@@ -1044,82 +657,4 @@ public class JPackageTask extends DefaultTask {
         }
     }
 
-    private void addParameter(Collection<String> params, String name, String value) {
-        if (value == null || value.isEmpty()) {
-            return;
-        }
-
-        getLogger().info("  " + name + " " + value);
-        params.add(name);
-        params.add(value);
-    }
-
-    private void addParameter(Collection<String> params, CommandLineParameter parameter, String value, int version) {
-        if (value == null || value.isEmpty()) {
-            return;
-        }
-
-        parameter.checkVersion(version);
-
-        getLogger().info("  " + parameter.getName() + " " + value);
-        params.add(parameter.getName());
-        params.add(value);
-    }
-
-    private void addFileParameter(Collection<String> params, CommandLineParameter parameter, String value, int version) {
-        addFileParameter(params, parameter, value, true, version);
-    }
-
-    private void addFileParameter(Collection<String> params, CommandLineParameter parameter, String value, boolean mustExist, int version) {
-        if (value == null || value.isEmpty()) {
-            return;
-        }
-
-        parameter.checkVersion(version);
-
-        File file = getProject().file(value);
-        if (mustExist && !file.exists()) {
-            throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
-        }
-
-        addParameter(params, parameter.getName(), file.getAbsolutePath());
-    }
-
-    private void addParameter(Collection<String> params, String name, boolean value) {
-        if (!value) {
-            return;
-        }
-
-        getLogger().info("  " + name);
-        params.add(name);
-    }
-
-    private void addParameter(Collection<String> params, CommandLineParameter parameter, boolean value, int version) {
-        if (!value) {
-            return;
-        }
-
-        parameter.checkVersion(version);
-
-        getLogger().info("  " + parameter.getName());
-        params.add(parameter.getName());
-    }
-
-    private void addParameter(Collection<String> params, CommandLineParameter parameter, EnumParameter value, int version) {
-        if (value == null) {
-            return;
-        }
-
-        parameter.checkVersion(version);
-
-        addParameter(params, parameter.getName(), value.getValue());
-    }
-
-    private void addAdditionalParameter(Collection<String> params, String parameter) {
-        if (parameter == null || parameter.isEmpty()) {
-            return;
-        }
-        getLogger().info("  " + parameter);
-        params.add(parameter);
-    }
 }

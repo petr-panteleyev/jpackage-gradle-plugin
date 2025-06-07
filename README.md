@@ -1,6 +1,6 @@
 # JPackage Gradle Plugin
 
-Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool available since JDK-14.
+Gradle plugin for [jpackage](https://openjdk.java.net/jeps/343) tool.
 
 [![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/org/panteleyev/jpackageplugin/org.panteleyev.jpackageplugin.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugin)](https://plugins.gradle.org/plugin/org.panteleyev.jpackageplugin)
 [![Gradle](https://img.shields.io/badge/Gradle-7.4%2B-green)](https://gradle.org/)
@@ -14,6 +14,14 @@ Plugin searches for ```jpackage``` executable using the following priority list:
 1. Configured toolchain
 
 2. ```java.home``` system property.
+
+Though rarely required it is possible to override toolchain for particular ```jpackage``` task:
+
+```kotlin
+javaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(21)
+}
+```
 
 ## Configuration
 
@@ -35,12 +43,12 @@ winDirChooser = true
 
 mac {
     // Generic parameter value for OS X build
-    icon = "icons/icons.icns"
+    icon = "${layout.projectDirectory}/icons/icons.icns"
 }
 
 windows {
     // Generic parameter value for Windows build
-    icon = "icons/icons.ico"
+    icon = "${layout.projectDirectory}/icons/icons.ico"
 }
 ```
 
@@ -117,21 +125,24 @@ windows {
 
 </table>
 
-<sup>(*)</sup> - these parameters represent file or directory path and are resolved relative to the project root unless
-they contain an absolute path.
+<sup>(*)</sup> - these parameters represent file or directory path and are resolved relative to 
+```layout.projectDirectory``` unless they contain an absolute path.
+
+Since version ```1.7.0``` the plugin does not check if parameter is applicable to ```jpackage``` tool version. 
+Users are advised to consult the corresponding User's Guide.
 
 ### Image Type
 
-|Plugin Value|JPackage Type|
-|---|---|
-|DEFAULT|Default image type, OS specific|
-|APP_IMAGE|app-image|
-|DMG|dmg|
-|PKG|pkg|
-|EXE|exe|
-|MSI|msi|
-|RPM|rpm|
-|DEB|deb|
+| Plugin Value | JPackage Type                   |
+|--------------|---------------------------------|
+| DEFAULT      | Default image type, OS specific |
+| APP_IMAGE    | app-image                       |
+| DMG          | dmg                             |
+| PKG          | pkg                             |
+| EXE          | exe                             |
+| MSI          | msi                             |
+| RPM          | rpm                             |
+| DEB          | deb                             |
 
 ### Destination Directory
 
@@ -145,10 +156,8 @@ For safety reasons plugin will not process ```removeDestination``` if ```destina
 _Example:_
 
 ```kotlin
-jpackage {
-    destination = "${layout.buildDirectory.get()}/dist"
-    removeDestination = true
-}
+destination = "${layout.buildDirectory.get()}/dist"
+removeDestination = true
 ```
 
 ### Default Command-Line Arguments
@@ -206,7 +215,6 @@ jpackageEnvironment = mapOf(
 
 ```null``` values as well as ```null``` or empty keys are ignored.
 
-
 ## Logging
 
 Plugin uses ```LogLevel.INFO``` to print various information about toolchain, jpackage parameters, etc. Use gradle 
@@ -224,7 +232,11 @@ $ ./gradlew clean build jpackage --info -Djpackage.dryRun=true
 
 ## Configuration Cache
 
-This plugin is not compatible with Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html).
+This plugin should be compatible with Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html).
+
+By default ```jpackage``` tasks are configured as not up-to-date in order to always rebuild their output.
+This may affect performance of repeatable builds. However ```jpackage``` tool requires an empty ```destination```
+which means skipping this task does not make much sense.
 
 ## Examples
 
@@ -233,4 +245,4 @@ This plugin is not compatible with Gradle [configuration cache](https://docs.gra
 
 ## References
 
-[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/19/jpackage/packaging-tool-user-guide.pdf)
+[Packaging Tool User's Guide](https://docs.oracle.com/en/java/javase/24/jpackage/packaging-tool-user-guide.pdf)

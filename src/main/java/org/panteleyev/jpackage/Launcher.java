@@ -1,10 +1,12 @@
 /*
- Copyright (c) Petr Panteleyev. All rights reserved.
- Licensed under the BSD license. See LICENSE file in the project root for full license information.
+ Copyright © 2021-2025 Petr Panteleyev <petr@panteleyev.org>
+ SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
 
 import org.gradle.api.GradleException;
+
+import java.io.File;
 import java.util.Objects;
 
 public final class Launcher {
@@ -12,8 +14,8 @@ public final class Launcher {
     private final String filePath;
 
     public Launcher(String name, String filePath) {
-        if (name == null || name.isEmpty() || filePath == null || filePath.isEmpty()) {
-            throw new GradleException("Launcher parameters cannot be null or empty");
+        if (name == null || name.isEmpty() || filePath == null) {
+            throw new GradleException("Launcher parameters cannot be null");
         }
 
         this.name = name;

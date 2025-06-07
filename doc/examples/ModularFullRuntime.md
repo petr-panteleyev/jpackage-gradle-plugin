@@ -1,11 +1,11 @@
 # Modular Application with Full Runtime
 
 ```kotlin
-task("copyDependencies", Copy::class) {
+tasks.register("copyDependencies", Copy::class) {
     from(configurations.runtimeClasspath).into("${layout.buildDirectory.get()}/jmods")
 }
 
-task("copyJar", Copy::class) {
+tasks.register("copyJar", Copy::class) {
     from(tasks.jar).into("${layout.buildDirectory.get()}/jmods")
 }
 
@@ -23,11 +23,11 @@ tasks.jpackage {
     javaOptions = listOf("-Dfile.encoding=UTF-8")
 
     mac {
-        icon = "icons/icons.icns"
+        icon = "${layout.projectDirectory}/icons/icons.icns"
     }
 
     windows {
-        icon = "icons/icons.ico"
+        icon = "${layout.projectDirectory}/icons/icons.ico"
         winMenu = true
         winDirChooser = true
     }

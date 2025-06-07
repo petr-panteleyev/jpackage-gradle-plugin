@@ -1,10 +1,10 @@
 /*
- Copyright (c) Petr Panteleyev. All rights reserved.
- Licensed under the BSD license. See LICENSE file in the project root for full license information.
+ Copyright © 2020-2025 Petr Panteleyev <petr@panteleyev.org>
+ SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
 
-public enum ImageType implements EnumParameter {
+public enum ImageType {
     DEFAULT(""),
     APP_IMAGE("app-image"),
     DMG("dmg"),
@@ -20,7 +20,6 @@ public enum ImageType implements EnumParameter {
         this.value = value;
     }
 
-    @Override
     public String getValue() {
         return value;
     }

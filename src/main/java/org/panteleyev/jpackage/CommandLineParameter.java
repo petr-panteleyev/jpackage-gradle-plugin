@@ -1,12 +1,8 @@
 /*
- Copyright © 2022-2023 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2022-2025 Petr Panteleyev <petr@panteleyev.org>
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
-
-import org.gradle.api.GradleException;
-
-import static org.panteleyev.jpackage.JPackageTask.EXECUTABLE;
 
 enum CommandLineParameter {
     NAME("--name"),
@@ -34,33 +30,33 @@ enum CommandLineParameter {
     ARGUMENTS("--arguments"),
     FILE_ASSOCIATIONS("--file-associations"),
     ADD_LAUNCHER("--add-launcher"),
-    BIND_SERVICES("--bind-services", 14, 15),
-    JLINK_OPTIONS("--jlink-options", 16),
-    ABOUT_URL("--about-url", 17),
-    APP_CONTENT("--app-content", 18),
-    LAUNCHER_AS_SERVICE("--launcher-as-service", 19),
+    BIND_SERVICES("--bind-services"),
+    JLINK_OPTIONS("--jlink-options"),
+    ABOUT_URL("--about-url"),
+    APP_CONTENT("--app-content"),
+    LAUNCHER_AS_SERVICE("--launcher-as-service"),
     // Mac
     MAC_PACKAGE_IDENTIFIER("--mac-package-identifier"),
     MAC_PACKAGE_NAME("--mac-package-name"),
-    MAC_BUNDLE_SIGNING_PREFIX("--mac-bundle-signing-prefix", 14, 16),
-    MAC_PACKAGE_SIGNING_PREFIX("--mac-package-signing-prefix", 17),
-    MAC_APP_STORE("--mac-app-store", 17),
-    MAC_ENTITLEMENTS("--mac-entitlements", 17),
-    MAC_APP_CATEGORY("--mac-app-category", 17),
+    MAC_BUNDLE_SIGNING_PREFIX("--mac-bundle-signing-prefix"),
+    MAC_PACKAGE_SIGNING_PREFIX("--mac-package-signing-prefix"),
+    MAC_APP_STORE("--mac-app-store"),
+    MAC_ENTITLEMENTS("--mac-entitlements"),
+    MAC_APP_CATEGORY("--mac-app-category"),
     MAC_SIGN("--mac-sign"),
     MAC_SIGNING_KEYCHAIN("--mac-signing-keychain"),
     MAC_SIGNING_KEY_USER_NAME("--mac-signing-key-user-name"),
-    MAC_DMG_CONTENT("--mac-dmg-content", 18),
+    MAC_DMG_CONTENT("--mac-dmg-content"),
     // Windows
     WIN_CONSOLE("--win-console"),
     WIN_DIR_CHOOSER("--win-dir-chooser"),
-    WIN_HELP_URL("--win-help-url", 17),
+    WIN_HELP_URL("--win-help-url"),
     WIN_MENU("--win-menu"),
     WIN_MENU_GROUP("--win-menu-group"),
     WIN_PER_USER_INSTALL("--win-per-user-install"),
     WIN_SHORTCUT("--win-shortcut"),
-    WIN_SHORTCUT_PROMPT("--win-shortcut-prompt", 17),
-    WIN_UPDATE_URL("--win-update-url", 17),
+    WIN_SHORTCUT_PROMPT("--win-shortcut-prompt"),
+    WIN_UPDATE_URL("--win-update-url"),
     WIN_UPGRADE_UUID("--win-upgrade-uuid"),
     // Linux
     LINUX_PACKAGE_NAME("--linux-package-name"),
@@ -73,44 +69,12 @@ enum CommandLineParameter {
     LINUX_SHORTCUT("--linux-shortcut");
 
     private final String name;
-    private final int minVersion;
-    private final int maxVersion;
-
-    CommandLineParameter(String name, int minVersion, int maxVersion) {
-        this.name = name;
-        this.minVersion = minVersion;
-        this.maxVersion = maxVersion;
-    }
-
-    CommandLineParameter(String name, int minVersion) {
-        this(name, minVersion, Integer.MAX_VALUE);
-    }
 
     CommandLineParameter(String name) {
-        this(name, 14, Integer.MAX_VALUE);
+        this.name = name;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void checkVersion(int version) throws GradleException {
-        if (version == 0) {
-            return;
-        }
-
-        if (version < minVersion || version > maxVersion) {
-            throw new GradleException(
-                    "Parameter \""
-                            + name
-                            + "\" requires "
-                            + EXECUTABLE
-                            + " versions: ["
-                            + minVersion
-                            + ".."
-                            + (maxVersion == Integer.MAX_VALUE ? "*" : maxVersion)
-                            + "]"
-            );
-        }
     }
 }

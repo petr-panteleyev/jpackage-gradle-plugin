@@ -1,5 +1,5 @@
 /*
- Copyright © 2022 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2022-2025 Petr Panteleyev <petr@panteleyev.org>
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
@@ -13,7 +13,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LauncherTest {
 
@@ -38,7 +40,7 @@ public class LauncherTest {
     public void testEquals() {
         Launcher l1 = new Launcher("123", "345");
         Launcher l2 = new Launcher("123", "345");
-        Launcher l3 = new Launcher("345", "123");
+        Launcher l3 = new Launcher("345", "345");
 
         assertEquals(l1, l1);
         assertEquals(l2, l1);
