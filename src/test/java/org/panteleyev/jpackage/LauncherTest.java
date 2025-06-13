@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,26 +22,26 @@ public class LauncherTest {
 
     private static List<Arguments> constructorExceptions() {
         return Arrays.asList(
-                Arguments.of("", ""),
+                Arguments.of("", new File("")),
                 Arguments.of(null, null),
                 Arguments.of("", null),
-                Arguments.of(null, "")
+                Arguments.of(null, new File(""))
         );
     }
 
     @ParameterizedTest
     @MethodSource("constructorExceptions")
-    public void testConstructorException(String name, String filePath) {
+    public void testConstructorException(String name, File file) {
         assertThrows(GradleException.class, () -> {
-            new Launcher(name, filePath);
+            new Launcher(name, file);
         });
     }
 
     @Test
     public void testEquals() {
-        Launcher l1 = new Launcher("123", "345");
-        Launcher l2 = new Launcher("123", "345");
-        Launcher l3 = new Launcher("345", "345");
+        Launcher l1 = new Launcher("123", new File("345"));
+        Launcher l2 = new Launcher("123", new File("345"));
+        Launcher l3 = new Launcher("345", new File("345"));
 
         assertEquals(l1, l1);
         assertEquals(l2, l1);

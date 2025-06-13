@@ -6,6 +6,8 @@ package org.panteleyev.jpackage;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
 
@@ -82,12 +84,52 @@ class Parameters {
         params.add(file.getAbsolutePath());
     }
 
+    public void addFile(CommandLineParameter parameter, RegularFileProperty prop, boolean mustExist) {
+        if (!prop.isPresent()) {
+            return;
+        }
+
+        File file = prop.get().getAsFile();
+        if (mustExist && !file.exists()) {
+            throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
+        }
+
+        logger.info("  {} {}", parameter.getName(), file.getAbsolutePath());
+        params.add(parameter.getName());
+        params.add(file.getAbsolutePath());
+    }
+
+    public void addFile(CommandLineParameter parameter, DirectoryProperty prop, boolean mustExist) {
+        if (!prop.isPresent()) {
+            return;
+        }
+
+        File file = prop.get().getAsFile();
+        if (mustExist && !file.exists()) {
+            throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
+        }
+
+        logger.info("  {} {}", parameter.getName(), file.getAbsolutePath());
+        params.add(parameter.getName());
+        params.add(file.getAbsolutePath());
+    }
+
     public void addFile(CommandLineParameter parameter, String value, boolean mustExist) {
         if (value == null || value.isEmpty()) {
             return;
         }
 
         File file = projectDirectory.file(value).getAsFile();
+        if (mustExist && !file.exists()) {
+            throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
+        }
+
+        logger.info("  {} {}", parameter.getName(), file.getAbsolutePath());
+        params.add(parameter.getName());
+        params.add(file.getAbsolutePath());
+    }
+
+    public void addFile(CommandLineParameter parameter, File file, boolean mustExist) {
         if (mustExist && !file.exists()) {
             throw new GradleException("File or directory " + file.getAbsolutePath() + " does not exist");
         }

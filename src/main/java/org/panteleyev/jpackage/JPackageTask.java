@@ -6,13 +6,19 @@ package org.panteleyev.jpackage;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -99,7 +105,6 @@ import static org.panteleyev.jpackage.StringUtil.escape;
 public abstract class JPackageTask extends DefaultTask {
     static final String EXECUTABLE = "jpackage";
 
-    private final File buildDir;
     private final String projectVersion = getProject().getVersion().toString();
 
     // Plugin internal options
@@ -107,8 +112,6 @@ public abstract class JPackageTask extends DefaultTask {
 
     public JPackageTask() {
         dryRun = Boolean.getBoolean("jpackage.dryRun");
-        buildDir = getProject().getBuildDir();
-        getOutputs().upToDateWhen(element -> false);
 
         try {
             JavaToolchainSpec toolchain = getProject().getExtensions()
@@ -132,15 +135,15 @@ public abstract class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract Property<Boolean> getVerbose();
+    public abstract Property<String> getAboutUrl();
+
+    @InputFiles
+    @org.gradle.api.tasks.Optional
+    public abstract ConfigurableFileCollection getAppContent();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract Property<ImageType> getType();
-
-    @Input
-    @org.gradle.api.tasks.Optional
-    public abstract Property<String> getAppName();
+    public abstract Property<String> getAppDescription();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -148,30 +151,34 @@ public abstract class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
+    public abstract Property<String> getAppName();
+
+    @Input
+    @org.gradle.api.tasks.Optional
     public abstract Property<String> getAppVersion();
 
-    @Input
+    @InputFiles
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getVendor();
+    public abstract ConfigurableFileCollection getFileAssociations();
 
-    @Input
+    @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getIcon();
+    public abstract RegularFileProperty getIcon();
 
-    @Input
+    @InputDirectory
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getRuntimeImage();
+    public abstract DirectoryProperty getRuntimeImage();
 
-    @Input
+    @InputDirectory
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getInput();
+    public abstract DirectoryProperty getInput();
 
     @Input
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getInstallDir();
 
     @OutputDirectory
-    public abstract Property<String> getDestination();
+    public abstract DirectoryProperty getDestination();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -181,33 +188,29 @@ public abstract class JPackageTask extends DefaultTask {
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getMainClass();
 
-    @Input
+    @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getMainJar();
+    public abstract RegularFileProperty getMainJar();
 
     @Input
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getCopyright();
 
-    @Input
+    @InputFiles
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getAppDescription();
+    public abstract ConfigurableFileCollection getModulePaths();
 
-    @Input
+    @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract ListProperty<String> getModulePaths();
+    public abstract RegularFileProperty getLicenseFile();
 
-    @Input
+    @InputDirectory
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getLicenseFile();
+    public abstract DirectoryProperty getResourceDir();
 
-    @Input
+    @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getResourceDir();
-
-    @Input
-    @org.gradle.api.tasks.Optional
-    public abstract Property<String> getTemp();
+    public abstract DirectoryProperty getTemp();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -216,10 +219,6 @@ public abstract class JPackageTask extends DefaultTask {
     @Input
     @org.gradle.api.tasks.Optional
     public abstract ListProperty<String> getArguments();
-
-    @Input
-    @org.gradle.api.tasks.Optional
-    public abstract ListProperty<String> getFileAssociations();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -240,19 +239,19 @@ public abstract class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getAboutUrl();
-
-    @Input
-    @org.gradle.api.tasks.Optional
     public abstract Property<Boolean> getLauncherAsService();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract ListProperty<String> getAppContent();
+    public abstract Property<ImageType> getType();
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract Property<Boolean> getRemoveDestination();
+    public abstract Property<String> getVendor();
+
+    @Input
+    @org.gradle.api.tasks.Optional
+    public abstract Property<Boolean> getVerbose();
 
     // Windows specific parameters
 
@@ -334,13 +333,13 @@ public abstract class JPackageTask extends DefaultTask {
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getMacAppCategory();
 
-    @Input
+    @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract Property<String> getMacEntitlements();
+    public abstract RegularFileProperty getMacEntitlements();
 
-    @Input
+    @InputFiles
     @org.gradle.api.tasks.Optional
-    public abstract ListProperty<String> getMacDmgContent();
+    public abstract ConfigurableFileCollection getMacDmgContent();
 
     // Linux specific parameters
 
@@ -438,7 +437,7 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addString(ABOUT_URL, getAboutUrl());
         if (getLaunchers().isPresent()) {
             for (Launcher launcher : getLaunchers().get()) {
-                File launcherFile = new File(launcher.getFilePath());
+                File launcherFile = launcher.getFile();
                 if (!launcherFile.exists()) {
                     throw new GradleException(
                             "Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
@@ -452,11 +451,10 @@ public abstract class JPackageTask extends DefaultTask {
                 parameters.addString(ADD_MODULES, String.join(",", addModules));
             }
         }
-        if (getAppContent().isPresent()) {
-            for (Object appContentElement : getAppContent().get()) {
-                parameters.addFile(APP_CONTENT, appContentElement.toString(), true);
-            }
-        }
+
+        getAppContent().forEach(file -> parameters.addFile(APP_CONTENT, file, true));
+        getFileAssociations().forEach(file -> parameters.addFile(FILE_ASSOCIATIONS, file, true));
+
         parameters.addFile(APP_IMAGE, getAppImage(), true);
         parameters.addString(APP_VERSION, getAppVersion().getOrElse(projectVersion));
         if (getArguments().isPresent()) {
@@ -468,11 +466,7 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addString(COPYRIGHT, getCopyright());
         parameters.addString(DESCRIPTION, getAppDescription());
         parameters.addFile(DESTINATION, getDestination(), false);
-        if (getFileAssociations().isPresent()) {
-            for (Object association : getFileAssociations().get()) {
-                parameters.addFile(FILE_ASSOCIATIONS, association.toString(), true);
-            }
-        }
+
         parameters.addFile(ICON, getIcon(), true);
         parameters.addFile(INPUT, getInput(), true);
         parameters.addString(INSTALL_DIR, getInstallDir());
@@ -492,13 +486,11 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addBoolean(LAUNCHER_AS_SERVICE, getLauncherAsService());
         parameters.addFile(LICENSE_FILE, getLicenseFile(), true);
         parameters.addString(MAIN_CLASS, getMainClass());
-        parameters.addString(MAIN_JAR, getMainJar());
+        parameters.addFile(MAIN_JAR, getMainJar(), true);
         parameters.addString(MODULE, getModule());
-        if (getModulePaths().isPresent()) {
-            for (Object path : getModulePaths().get()) {
-                parameters.addFile(MODULE_PATH, path.toString(), true);
-            }
-        }
+
+        getModulePaths().forEach(file -> parameters.addFile(MODULE_PATH, file, true));
+
         parameters.addString(NAME, getAppName());
         parameters.addFile(RESOURCE_DIR, getResourceDir(), true);
         parameters.addFile(RUNTIME_IMAGE, getRuntimeImage(), true);
@@ -516,11 +508,7 @@ public abstract class JPackageTask extends DefaultTask {
             parameters.addString(MAC_APP_CATEGORY, getMacAppCategory());
             parameters.addBoolean(MAC_APP_STORE, getMacAppStore());
             parameters.addString(MAC_BUNDLE_SIGNING_PREFIX, getMacBundleSigningPrefix());
-            if (getMacDmgContent().isPresent()) {
-                for (Object dmgContent : getMacDmgContent().get()) {
-                    parameters.addFile(MAC_DMG_CONTENT, dmgContent.toString(), true);
-                }
-            }
+            getMacDmgContent().forEach(file -> parameters.addFile(MAC_DMG_CONTENT, file, true));
             parameters.addFile(MAC_ENTITLEMENTS, getMacEntitlements(), true);
             parameters.addString(MAC_PACKAGE_IDENTIFIER, getMacPackageIdentifier());
             parameters.addString(MAC_PACKAGE_NAME, getMacPackageName());
@@ -567,14 +555,13 @@ public abstract class JPackageTask extends DefaultTask {
             return;
         }
 
-        Path destinationPath = new File(getDestination().get()).toPath().toAbsolutePath();
-        if (getRemoveDestination().getOrElse(false)) {
-            if (!isNestedDirectory(buildDir.toPath(), destinationPath)) {
-                getLogger().error("Cannot remove destination folder, must belong to {}", buildDir.toPath());
-            } else {
-                getLogger().warn("Trying to remove destination {}", destinationPath);
-                removeDirectory(destinationPath);
-            }
+        Path destinationPath = getDestination().getAsFile().get().toPath().toAbsolutePath();
+        if (!isNestedDirectory(getProjectLayout().getBuildDirectory().getAsFile().get().toPath(), destinationPath)) {
+            getLogger().error("Cannot remove destination folder, must belong to {}",
+                    getProjectLayout().getBuildDirectory().get());
+        } else {
+            getLogger().warn("Trying to remove destination {}", destinationPath);
+            removeDirectory(destinationPath);
         }
 
         try {
