@@ -188,7 +188,7 @@ public abstract class JPackageTask extends DefaultTask {
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getMainClass();
 
-    @InputFile
+    @Input
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getMainJar();
 

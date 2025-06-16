@@ -3,7 +3,7 @@
  SPDX-License-Identifier: BSD-2-Clause
  */
 group = "org.panteleyev"
-version = "1.7.2"
+version = "1.7.3"
 
 plugins {
     java
