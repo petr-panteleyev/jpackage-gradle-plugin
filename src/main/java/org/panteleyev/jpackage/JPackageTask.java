@@ -190,7 +190,7 @@ public abstract class JPackageTask extends DefaultTask {
 
     @InputFile
     @org.gradle.api.tasks.Optional
-    public abstract RegularFileProperty getMainJar();
+    public abstract Property<String> getMainJar();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -486,7 +486,7 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addBoolean(LAUNCHER_AS_SERVICE, getLauncherAsService());
         parameters.addFile(LICENSE_FILE, getLicenseFile(), true);
         parameters.addString(MAIN_CLASS, getMainClass());
-        parameters.addFile(MAIN_JAR, getMainJar(), true);
+        parameters.addString(MAIN_JAR, getMainJar());
         parameters.addString(MODULE, getModule());
 
         getModulePaths().forEach(file -> parameters.addFile(MODULE_PATH, file, true));

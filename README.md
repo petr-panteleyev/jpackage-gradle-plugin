@@ -79,7 +79,7 @@ windows {
 | launcherAsService       | Property&lt;Boolean>       | --launcher-as-service                                        | 19          | *           |
 | licenseFile             | RegularFileProperty        | --license-file &lt;license file path>                        | 14          | *           |
 | mainClass               | Property&lt;String>        | --main-class &lt;class name>                                 | 14          | *           |
-| mainJar                 | RegularFileProperty        | --main-jar &lt;main jar file>                                | 14          | *           |
+| mainJar                 | Property&lt;String>        | --main-jar &lt;main jar file>                                | 14          | *           |
 | module                  | Property&lt;String>        | --module &lt;module name>[/&lt;main class>]                  | 14          | *           |
 | modulePaths             | ConfigurableFileCollection | --module-path &lt;module path>                               | 14          | *           |
 | resourceDir             | DirectoryProperty          | --resource-dir &lt;resource dir path>                        | 14          | *           |

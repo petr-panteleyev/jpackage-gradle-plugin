@@ -18,7 +18,7 @@ tasks.jpackage {
     appName = "Non-Modular Application"
     vendor = "app.org"
 
-    mainJar = tasks.jar.get().archiveFile
+    mainJar = tasks.jar.get().archiveFileName.get()
     mainClass = "org.app.MainClass"
 
     javaOptions = listOf("-Dfile.encoding=UTF-8")
