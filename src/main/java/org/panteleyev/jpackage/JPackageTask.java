@@ -21,6 +21,7 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
@@ -208,7 +209,8 @@ public abstract class JPackageTask extends DefaultTask {
     @org.gradle.api.tasks.Optional
     public abstract DirectoryProperty getResourceDir();
 
-    @InputFile
+    @InputDirectory
+    @SkipWhenEmpty
     @org.gradle.api.tasks.Optional
     public abstract DirectoryProperty getTemp();
 
