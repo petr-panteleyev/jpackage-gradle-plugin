@@ -209,10 +209,9 @@ public abstract class JPackageTask extends DefaultTask {
     @org.gradle.api.tasks.Optional
     public abstract DirectoryProperty getResourceDir();
 
-    @InputDirectory
-    @SkipWhenEmpty
+    @Input
     @org.gradle.api.tasks.Optional
-    public abstract DirectoryProperty getTemp();
+    public abstract Property<String> getTemp();
 
     @Input
     @org.gradle.api.tasks.Optional
