@@ -117,7 +117,7 @@ windows {
 | linuxDebMaintainer      | Property&lt;String>        | --linux-deb-maintainer &lt;email address>                    | 14          | *           |
 | linuxMenuGroup          | Property&lt;String>        | --linux-menu-group &lt;menu-group-name>                      | 14          | *           |
 | linuxPackageName        | Property&lt;String>        | --linux-package-name &lt;package name>                       | 14          | *           |
-| linuxPackageDeps        | Property&lt;Boolean>       | --linux-package-deps                                         | 14          | *           |
+| linuxPackageDeps        | Property&lt;String>        | --linux-package-deps &lt;package-dep-string>                 | 14          | *           |
 | linuxRpmLicenseType     | Property&lt;String>        | --linux-rpm-license-type &lt;type string>                    | 14          | *           |
 | linuxShortcut           | Property&lt;Boolean>       | --linux-shortcut                                             | 14          | *           |
 

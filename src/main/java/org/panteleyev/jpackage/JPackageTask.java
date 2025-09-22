@@ -1,5 +1,5 @@
 /*
- Copyright © 2021-2025 Petr Panteleyev <petr@panteleyev.org>
+ Copyright © 2021-2025 Petr Panteleyev
  SPDX-License-Identifier: BSD-2-Clause
  */
 package org.panteleyev.jpackage;
@@ -21,7 +21,6 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
@@ -374,7 +373,7 @@ public abstract class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
-    public abstract Property<Boolean> getLinuxPackageDeps();
+    public abstract Property<String> getLinuxPackageDeps();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -533,7 +532,7 @@ public abstract class JPackageTask extends DefaultTask {
             parameters.addString(LINUX_APP_RELEASE, getLinuxAppRelease());
             parameters.addString(LINUX_DEB_MAINTAINER, getLinuxDebMaintainer());
             parameters.addString(LINUX_MENU_GROUP, getLinuxMenuGroup());
-            parameters.addBoolean(LINUX_PACKAGE_DEPS, getLinuxPackageDeps());
+            parameters.addString(LINUX_PACKAGE_DEPS, getLinuxPackageDeps());
             parameters.addString(LINUX_PACKAGE_NAME, getLinuxPackageName());
             parameters.addString(LINUX_RPM_LICENSE_TYPE, getLinuxRpmLicenseType());
             parameters.addBoolean(LINUX_SHORTCUT, getLinuxShortcut());
