@@ -1,7 +1,5 @@
-/*
- Copyright © 2022-2025 Petr Panteleyev <petr@panteleyev.org>
- SPDX-License-Identifier: BSD-2-Clause
- */
+// Copyright © 2022-2026 Petr Panteleyev
+// SPDX-License-Identifier: BSD-2-Clause
 package org.panteleyev.jpackage;
 
 import org.gradle.api.GradleException;
@@ -32,16 +30,14 @@ public class LauncherTest {
     @ParameterizedTest
     @MethodSource("constructorExceptions")
     public void testConstructorException(String name, File file) {
-        assertThrows(GradleException.class, () -> {
-            new Launcher(name, file);
-        });
+        assertThrows(GradleException.class, () -> new Launcher(name, file));
     }
 
     @Test
     public void testEquals() {
-        Launcher l1 = new Launcher("123", new File("345"));
-        Launcher l2 = new Launcher("123", new File("345"));
-        Launcher l3 = new Launcher("345", new File("345"));
+        var l1 = new Launcher("123", new File("345"));
+        var l2 = new Launcher("123", new File("345"));
+        var l3 = new Launcher("345", new File("345"));
 
         assertEquals(l1, l1);
         assertEquals(l2, l1);

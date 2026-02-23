@@ -1,15 +1,10 @@
-/*
- Copyright © 2020-2025 Petr Panteleyev <petr@panteleyev.org>
- SPDX-License-Identifier: BSD-2-Clause
- */
+// Copyright © 2020-2026 Petr Panteleyev
+// SPDX-License-Identifier: BSD-2-Clause
 group = "org.panteleyev"
-version = "1.7.6"
+version = "2.0.0"
 
 plugins {
-    java
-    `java-gradle-plugin`
-    `maven-publish`
-    id("com.gradle.plugin-publish") version "1.3.1"
+    id("com.gradle.plugin-publish") version "2.0.0"
 }
 
 repositories {
@@ -17,29 +12,29 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation(junit.jupiter)
+    testRuntimeOnly(junit.platform.launcher)
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
 gradlePlugin {
-    val jpackage by plugins.creating {
-        id = "org.panteleyev.jpackageplugin"
-        version = project.version
-        displayName = "JPackage Gradle Plugin"
-        description = "A plugin that executes jpackage tool from JDK-14+"
-        implementationClass = "org.panteleyev.jpackage.JPackageGradlePlugin"
-    }
-}
-
-pluginBundle {
     website = "https://github.com/petr-panteleyev/jpackage-gradle-plugin"
     vcsUrl = "https://github.com/petr-panteleyev/jpackage-gradle-plugin.git"
-    tags = listOf("jpackage")
+    plugins {
+        register("jpackageplugin") {
+            id = "org.panteleyev.jpackageplugin"
+            version = project.version
+            displayName = "JPackage Gradle Plugin"
+            description = "A plugin that executes jpackage tool from JDK-14+"
+            implementationClass = "org.panteleyev.jpackage.JPackageGradlePlugin"
+            tags = listOf("jpackage")
+        }
+    }
 }
 
 tasks.withType<Test> {

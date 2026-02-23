@@ -1,7 +1,5 @@
-/*
- Copyright © 2021-2025 Petr Panteleyev
- SPDX-License-Identifier: BSD-2-Clause
- */
+// Copyright © 2021-2026 Petr Panteleyev
+// SPDX-License-Identifier: BSD-2-Clause
 package org.panteleyev.jpackage;
 
 import org.gradle.api.DefaultTask;
@@ -14,7 +12,6 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
@@ -24,14 +21,11 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
-import org.gradle.jvm.toolchain.JavaToolchainSpec;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,7 +36,6 @@ import static org.panteleyev.jpackage.CommandLineParameter.APP_CONTENT;
 import static org.panteleyev.jpackage.CommandLineParameter.APP_IMAGE;
 import static org.panteleyev.jpackage.CommandLineParameter.APP_VERSION;
 import static org.panteleyev.jpackage.CommandLineParameter.ARGUMENTS;
-import static org.panteleyev.jpackage.CommandLineParameter.BIND_SERVICES;
 import static org.panteleyev.jpackage.CommandLineParameter.COPYRIGHT;
 import static org.panteleyev.jpackage.CommandLineParameter.DESCRIPTION;
 import static org.panteleyev.jpackage.CommandLineParameter.DESTINATION;
@@ -114,9 +107,8 @@ public abstract class JPackageTask extends DefaultTask {
         dryRun = Boolean.getBoolean("jpackage.dryRun");
 
         try {
-            JavaToolchainSpec toolchain = getProject().getExtensions()
-                    .getByType(JavaPluginExtension.class).getToolchain();
-            Provider<JavaLauncher> defaultLauncher = getJavaToolchainService().launcherFor(toolchain);
+            var toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
+            var defaultLauncher = getJavaToolchainService().launcherFor(toolchain);
             getJavaLauncher().convention(defaultLauncher);
         } catch (Exception ex) {
             getLogger().trace("Failed to configure JavaLauncher");
@@ -227,11 +219,6 @@ public abstract class JPackageTask extends DefaultTask {
     @Input
     @org.gradle.api.tasks.Optional
     public abstract ListProperty<String> getAddModules();
-
-    @Input
-    @org.gradle.api.tasks.Optional
-    @Deprecated
-    public abstract Property<Boolean> getBindServices();
 
     @Input
     @org.gradle.api.tasks.Optional
@@ -389,7 +376,7 @@ public abstract class JPackageTask extends DefaultTask {
             getLogger().lifecycle("Executing jpackage plugin in dry run mode");
         }
 
-        String jpackage = getJPackageFromToolchain()
+        var jpackage = getJPackageFromToolchain()
                 .orElseGet(() -> getJPackageFromJavaHome()
                         .orElseThrow(() -> new GradleException("Could not detect " + EXECUTABLE)));
 
@@ -397,7 +384,7 @@ public abstract class JPackageTask extends DefaultTask {
     }
 
     private Optional<String> buildExecutablePath(String home) {
-        String executable = home + File.separator + "bin" + File.separator + EXECUTABLE + (isWindows() ? ".exe" : "");
+        var executable = home + File.separator + "bin" + File.separator + EXECUTABLE + (isWindows() ? ".exe" : "");
         if (new File(executable).exists()) {
             return Optional.of(executable);
         } else {
@@ -409,11 +396,11 @@ public abstract class JPackageTask extends DefaultTask {
     private Optional<String> getJPackageFromToolchain() {
         getLogger().info("Looking for {} in toolchain", EXECUTABLE);
         try {
-            JavaLauncher launcherValue = getJavaLauncher().getOrNull();
+            var launcherValue = getJavaLauncher().getOrNull();
             if (launcherValue == null) {
                 throw new RuntimeException();
             } else {
-                String home = launcherValue.getMetadata().getInstallationPath().getAsFile().getAbsolutePath();
+                var home = launcherValue.getMetadata().getInstallationPath().getAsFile().getAbsolutePath();
                 getLogger().info("toolchain: {}", home);
                 return buildExecutablePath(home);
             }
@@ -425,7 +412,7 @@ public abstract class JPackageTask extends DefaultTask {
 
     private Optional<String> getJPackageFromJavaHome() {
         getLogger().info("Getting {} from java.home", EXECUTABLE);
-        String javaHome = System.getProperty("java.home");
+        var javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             getLogger().error("java.home is not set");
             return Optional.empty();
@@ -437,16 +424,16 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addString(ABOUT_URL, getAboutUrl());
         if (getLaunchers().isPresent()) {
             for (Launcher launcher : getLaunchers().get()) {
-                File launcherFile = launcher.getFile();
+                var launcherFile = launcher.file();
                 if (!launcherFile.exists()) {
                     throw new GradleException(
                             "Launcher file " + launcherFile.getAbsolutePath() + " does not exist");
                 }
-                parameters.addString(ADD_LAUNCHER, launcher.getName() + "=" + launcherFile.getAbsolutePath());
+                parameters.addString(ADD_LAUNCHER, launcher.name() + "=" + launcherFile.getAbsolutePath());
             }
         }
         if (getAddModules().isPresent()) {
-            List<String> addModules = getAddModules().get();
+            var addModules = getAddModules().get();
             if (!addModules.isEmpty()) {
                 parameters.addString(ADD_MODULES, String.join(",", addModules));
             }
@@ -458,11 +445,10 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addFile(APP_IMAGE, getAppImage(), true);
         parameters.addString(APP_VERSION, getAppVersion().getOrElse(projectVersion));
         if (getArguments().isPresent()) {
-            for (Object arg : getArguments().get()) {
-                parameters.addString(ARGUMENTS, escape(arg.toString()));
+            for (var arg : getArguments().get()) {
+                parameters.addString(ARGUMENTS, escape(arg));
             }
         }
-        parameters.addBoolean(BIND_SERVICES, getBindServices());
         parameters.addString(COPYRIGHT, getCopyright());
         parameters.addString(DESCRIPTION, getAppDescription());
         parameters.addFile(DESTINATION, getDestination(), false);
@@ -471,13 +457,13 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addFile(INPUT, getInput(), true);
         parameters.addString(INSTALL_DIR, getInstallDir());
         if (getJavaOptions().isPresent()) {
-            for (Object option : getJavaOptions().get()) {
-                parameters.addString(JAVA_OPTIONS, escape(option.toString()));
+            for (var option : getJavaOptions().get()) {
+                parameters.addString(JAVA_OPTIONS, escape(option));
             }
         }
 
         if (getJLinkOptions().isPresent()) {
-            List<String> jLinkOptions = getJLinkOptions().get();
+            var jLinkOptions = getJLinkOptions().get();
             if (!jLinkOptions.isEmpty()) {
                 parameters.addString(JLINK_OPTIONS, String.join(" ", jLinkOptions));
             }
@@ -496,7 +482,7 @@ public abstract class JPackageTask extends DefaultTask {
         parameters.addFile(RUNTIME_IMAGE, getRuntimeImage(), true);
         parameters.addFile(TEMP, getTemp(), false);
 
-        ImageType type = getType().getOrElse(ImageType.DEFAULT);
+        var type = getType().getOrElse(ImageType.DEFAULT);
         if (type != ImageType.DEFAULT) {
             parameters.addString(TYPE, type.getValue());
         }
@@ -540,14 +526,14 @@ public abstract class JPackageTask extends DefaultTask {
 
         // Additional options
         if (getAdditionalParameters().isPresent()) {
-            for (Object option : getAdditionalParameters().get()) {
-                parameters.add(option.toString());
+            for (var option : getAdditionalParameters().get()) {
+                parameters.add(option);
             }
         }
     }
 
     private void execute(String cmd) {
-        Parameters parameters = new Parameters(getLogger(), getProjectLayout().getProjectDirectory());
+        var parameters = new Parameters(getLogger(), getProjectLayout().getProjectDirectory());
         parameters.add(cmd.contains(" ") ? "\"" + cmd + "\"" : cmd);
         buildParameters(parameters);
 
@@ -555,7 +541,7 @@ public abstract class JPackageTask extends DefaultTask {
             return;
         }
 
-        Path destinationPath = getDestination().getAsFile().get().toPath().toAbsolutePath();
+        var destinationPath = getDestination().getAsFile().get().toPath().toAbsolutePath();
         if (!isNestedDirectory(getProjectLayout().getBuildDirectory().getAsFile().get().toPath(), destinationPath)) {
             getLogger().error("Cannot remove destination folder, must belong to {}",
                     getProjectLayout().getBuildDirectory().get());
@@ -568,14 +554,14 @@ public abstract class JPackageTask extends DefaultTask {
             ProcessBuilder processBuilder = new ProcessBuilder();
 
             if (getJpackageEnvironment().isPresent()) {
-                Map<String, String> jPackageEnvironment = getJpackageEnvironment().get();
+                var jPackageEnvironment = getJpackageEnvironment().get();
                 if (!jPackageEnvironment.isEmpty()) {
                     getLogger().info(EXECUTABLE + " environment:");
 
-                    Map<String, String> environment = processBuilder.environment();
+                    var environment = processBuilder.environment();
                     for (Map.Entry<String, String> entry : jPackageEnvironment.entrySet()) {
-                        String key = entry.getKey();
-                        String value = entry.getValue();
+                        var key = entry.getKey();
+                        var value = entry.getValue();
 
                         if (key == null || key.trim().isEmpty() || value == null) {
                             // Silently skip null or empty keys or null values
@@ -588,14 +574,14 @@ public abstract class JPackageTask extends DefaultTask {
                 }
             }
 
-            Process process = processBuilder
+            var process = processBuilder
                     .redirectErrorStream(true)
                     .command(parameters.getParams())
                     .start();
 
             getLogger().info(EXECUTABLE + " output:");
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     getLogger().info(line);
@@ -643,5 +629,4 @@ public abstract class JPackageTask extends DefaultTask {
             block.run();
         }
     }
-
 }

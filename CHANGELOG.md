@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0] - 2026-02-23
+
+### Changed
+- Required Gradle version is now 9.1.0
+- Class Launcher converted to Java record
+
+### Removed
+- Deprecated option `bindServices`
+
 ## [1.7.6] - 2025-09-23
 
 ### Fixed

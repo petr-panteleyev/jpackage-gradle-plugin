@@ -1,7 +1,5 @@
-/*
- Copyright © 2022-2025 Petr Panteleyev <petr@panteleyev.org>
- SPDX-License-Identifier: BSD-2-Clause
- */
+// Copyright © 2022-2026 Petr Panteleyev
+// SPDX-License-Identifier: BSD-2-Clause
 package org.panteleyev.jpackage;
 
 enum CommandLineParameter {
@@ -12,7 +10,6 @@ enum CommandLineParameter {
     APP_IMAGE("--app-image"),
     APP_VERSION("--app-version"),
     ARGUMENTS("--arguments"),
-    BIND_SERVICES("--bind-services"),
     COPYRIGHT("--copyright"),
     DESCRIPTION("--description"),
     DESTINATION("--dest"),
