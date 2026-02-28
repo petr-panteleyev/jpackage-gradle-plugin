@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.1] - 2026-03-01
+
+### Fixed
+- Workaround for JDK-25 file operations changed behavior on Windows
+
 ## [2.0.0] - 2026-02-23
 
 ### Changed

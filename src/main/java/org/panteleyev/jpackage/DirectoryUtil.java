@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.panteleyev.jpackage;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.DosFileAttributeView;
 import java.util.Comparator;
+
+import static org.panteleyev.jpackage.OsUtil.isWindows;
 
 final class DirectoryUtil {
 
@@ -22,10 +24,27 @@ final class DirectoryUtil {
 
         try (var paths = Files.walk(dir)) {
             paths.sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+                    .forEach(DirectoryUtil::delete);
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
+        }
+    }
+
+    private static void delete(Path path) {
+        try {
+            if (isWindows()) {
+                clearDosReadonly(path);
+            }
+            Files.delete(path);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
+    private static void clearDosReadonly(Path path) throws IOException {
+        var view = Files.getFileAttributeView(path, DosFileAttributeView.class);
+        if (view != null) {
+            view.setReadOnly(false);
         }
     }
 
