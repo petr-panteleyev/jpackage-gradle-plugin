@@ -73,6 +73,7 @@ windows {
 | input                   | DirectoryProperty          | --input &lt;input path>                                      | 14          | *           |
 | installDir              | Property&lt;String>        | --install-dir &lt;file path>                                 | 14          | *           |
 | javaOptions             | ListProperty&lt;String>    | --java-options &lt;options>                                  | 14          | *           |
+| jLink                   | Property&lt;JLink>         | --jlink-options &lt;options>                                 | 16          | *           |
 | jLinkOptions            | ListProperty&lt;String>    | --jlink-options &lt;options>                                 | 16          | *           |
 | launchers               | ListProperty&lt;Launcher>  | --add-launcher &lt;name>=&lt;property file>                  | 14          | *           |
 | launcherAsService       | Property&lt;Boolean>       | --launcher-as-service                                        | 19          | *           |
@@ -202,6 +203,30 @@ jLinkOptions = listOf(
     "--strip-debug"
 )
 ```
+
+Another way is to use ```jLink``` property of class ```JLink```:
+
+| Field               | Type    | jlink Option            |
+|---------------------|---------|-------------------------|
+| bindServices        | boolean | --bind-services         |
+| noHeaderFiles       | boolean | --no-header-files       |
+| noManPages          | boolean | --no-man-pages          |
+| stripDebug          | boolean | --strip-debug           |
+| stripNativeCommands | boolean | --strip-native-commands |
+| generateCdsArchive  | boolean | --generate-cds-archive  |
+
+_Example:_
+
+```kotlin
+jLink = JLink().apply {
+    stripNativeCommands = true
+    noHeaderFiles = true
+    noManPages = true
+    stripDebug = true
+}
+```
+
+Both ways can be used together if required.
 
 ### jpackage Environment Variables
 

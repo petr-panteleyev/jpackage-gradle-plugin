@@ -1,7 +1,7 @@
 // Copyright © 2020-2026 Petr Panteleyev
 // SPDX-License-Identifier: BSD-2-Clause
 group = "org.panteleyev"
-version = "2.0.1"
+version = "2.1.0"
 
 plugins {
     id("com.gradle.plugin-publish") version "2.0.0"

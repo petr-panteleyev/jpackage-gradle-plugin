@@ -226,6 +226,10 @@ public abstract class JPackageTask extends DefaultTask {
 
     @Input
     @org.gradle.api.tasks.Optional
+    public abstract Property<JLink> getJLink();
+
+    @Input
+    @org.gradle.api.tasks.Optional
     public abstract Property<Boolean> getLauncherAsService();
 
     @Input
@@ -467,6 +471,9 @@ public abstract class JPackageTask extends DefaultTask {
             if (!jLinkOptions.isEmpty()) {
                 parameters.addString(JLINK_OPTIONS, String.join(" ", jLinkOptions));
             }
+        }
+        if (getJLink().isPresent()) {
+            parameters.addString(JLINK_OPTIONS, getJLink().get().build());
         }
 
         parameters.addBoolean(LAUNCHER_AS_SERVICE, getLauncherAsService());
